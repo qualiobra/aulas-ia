@@ -1,0 +1,136 @@
+Plano bom não é plano longo. Plano bom é plano **executável sem dúvida**. Se um plano deixa você (ou o Claude) com perguntas no ar, ele não é plano, é wishful thinking formatado em bullet point.
+
+Essa lição mostra as 5 partes que todo plano útil tem, e o teste que separa plano de placebo.
+
+## Os 5 elementos obrigatórios
+
+### 1. Objetivo (1 frase, sem ambiguidade)
+
+O que essa mudança entrega pro usuário final, em linguagem de produto. Não "refatorar o auth". Sim "permitir que o usuário faça login com Google sem precisar criar senha".
+
+Teste: se alguém ler só essa frase, ela sabe se a entrega foi feita?
+
+### 2. Passos numerados, granulares
+
+Cada passo deve ser uma ação concreta, num arquivo ou conceito específico. "Implementar autenticação" não é passo, é título. "Adicionar route handler em `app/api/auth/google/route.ts` que recebe o token e troca por sessão" é passo.
+
+Granularidade certa: cada passo cabe em 1 a 3 arquivos e dá pra revisar em 30 segundos.
+
+### 3. Critério de aceite (o "como vou saber que terminou")
+
+Lista de verificações observáveis. Não "funcionar". Sim:
+
+- Clicar no botão "Entrar com Google" abre popup do Google.
+- Após autorizar, o usuário cai em `/dashboard` logado.
+- Recarregar a página mantém ele logado.
+- Logout limpa a sessão e volta pra `/`.
+
+Sem critério de aceite, "terminar" vira opinião. Com critério, vira checklist.
+
+### 4. Riscos / pontos de atenção
+
+O que pode dar errado, o que você está assumindo que pode não ser verdade, o que precisa de atenção. Exemplos reais:
+
+- "Assumindo que a tabela `users` aceita `google_id` como coluna nova; precisa migração."
+- "Risco: rate limit do Google OAuth em dev. Configurar app de teste antes."
+- "Atenção: cookie de sessão precisa ser `httpOnly` e `secure` em prod."
+
+Esse item é o que mais separa plano bom de plano ruim. Plano sem riscos é plano que ainda não foi pensado de verdade.
+
+### 5. Arquivos afetados (lista)
+
+Caminho exato de cada arquivo que vai ser criado, modificado ou removido. Não "arquivos de auth". Sim:
+
+- CRIAR: `app/api/auth/google/route.ts`
+- MODIFICAR: `lib/auth.ts` (adicionar provider Google)
+- MODIFICAR: `prisma/schema.prisma` (campo `googleId` opcional em User)
+- CRIAR: `prisma/migrations/20260521_add_google_id/migration.sql`
+
+Sem essa lista, você não consegue prever o blast radius. Com ela, bate o olho e sabe se a coisa tá no tamanho certo.
+
+<AnalogiaObra titulo="Memorial descritivo vs 'faz aí uma reforma na cozinha'">
+Você tem duas formas de contratar reforma. Uma é o memorial descritivo: "demolir parede entre cozinha e área de serviço (espessura 15cm, sem função estrutural conforme laudo), realocar pia para parede oposta, instalar bancada granito preto 2,80m, prazo 18 dias úteis, custo R$ 14.300, risco principal é encontrar tubulação não mapeada na demolição".
+
+A outra é "faz aí uma reforma maneira na cozinha, igual a da minha irmã". Adivinha qual versão termina em briga.
+
+Plano de código é igual. Os 5 elementos acima são o memorial descritivo. Sem eles, você tá pagando pelo "faz aí uma reforma maneira".
+</AnalogiaObra>
+
+## Exemplo ruim (e por quê)
+
+> **Plano: melhorar a listagem de tarefas**
+>
+> 1. Refatorar componente de lista
+> 2. Adicionar filtros
+> 3. Melhorar performance
+> 4. Atualizar testes
+
+Problemas:
+
+- "Refatorar" é verbo vazio. Pra quê? Mudar o quê?
+- "Filtros" sem dizer quais filtros. Por status? Por data? Por atribuído?
+- "Melhorar performance" sem métrica. De quanto pra quanto? Em que cenário?
+- Não tem arquivos.
+- Não tem critério de aceite.
+- Não tem risco.
+
+Esse plano é placebo. Se você aprovar, o Claude vai inventar. Provavelmente bem, mas pode inventar errado, e você não tem como comparar com sua intenção porque sua intenção nunca foi escrita.
+
+## Exemplo bom
+
+> **Objetivo**: permitir filtrar a lista de tarefas por status (pendente/em-andamento/concluída), mantendo o filtro na URL.
+>
+> **Passos**:
+> 1. Criar componente `<FiltroStatus>` em `components/tarefas/filtro-status.tsx` com 3 botões controlados.
+> 2. Em `app/tarefas/page.tsx`, ler `searchParams.status` e passar pro componente de lista.
+> 3. Em `lib/tarefas.ts`, aceitar parâmetro opcional `status` na função `listarTarefas`.
+> 4. Adicionar teste em `__tests__/tarefas.test.ts` cobrindo cada um dos 3 status + nenhum filtro.
+>
+> **Critério de aceite**:
+> - Clicar em "Pendente" atualiza a URL pra `?status=pendente` e mostra só pendentes.
+> - Recarregar a página com `?status=concluida` aplica o filtro.
+> - Botão "Todas" limpa o filtro.
+>
+> **Riscos**:
+> - Assumindo que `listarTarefas` hoje não tem filtro nenhum. Confirmar antes de mexer.
+> - Atenção: SSR vs client. O filtro precisa funcionar server-side pra SEO funcionar.
+>
+> **Arquivos afetados**:
+> - CRIAR: `components/tarefas/filtro-status.tsx`
+> - MODIFICAR: `app/tarefas/page.tsx`
+> - MODIFICAR: `lib/tarefas.ts`
+> - CRIAR: `__tests__/tarefas-filtro.test.ts`
+
+Esse plano você consegue revisar em 90 segundos. Sabe exatamente o que ele vai fazer. Sabe o que vai ser checado no final. Sabe onde olhar se algo quebrar.
+
+<Callout tipo="armadilha" titulo="Cuidado com verbo genérico">
+Se o plano tem "refatorar", "limpar", "melhorar", "otimizar" ou "ajustar" sem dizer **o quê** especificamente, é sinal vermelho. Pede pra trocar pelo verbo concreto: "extrair função X de Y", "remover campo Z", "trocar `useState` por `useReducer` em A". Verbo concreto é o que torna plano executável.
+</Callout>
+
+<ExercicioPratico numero={1} titulo="Reescrever um plano ruim" tempo="15min">
+Pega esse plano vago:
+
+> 1. Adicionar autenticação no projeto
+> 2. Melhorar UX do formulário
+> 3. Conectar com o banco
+
+Reescreve aplicando os 5 elementos (objetivo, passos, critério, riscos, arquivos). Assume um projeto Next.js + Supabase como contexto. Não precisa ser perfeito; precisa ser **executável**. Se ficar em dúvida sobre o quê inventar, escreve a dúvida como "lacuna" no fim do plano. Faz parte.
+</ExercicioPratico>
+
+<Checkpoint>
+- Plano bom tem 5 partes: objetivo, passos, critério de aceite, riscos, arquivos.
+- Verbo genérico ("refatorar", "melhorar") é sinal vermelho. Troca pelo verbo concreto.
+- Se você consegue revisar o plano em ~90 segundos e bater o olho na entrega depois, ele tá no tamanho certo.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="ai-hero" url="https://github.com/ai-hero-dev/ai-hero" autor="Matt Pocock">
+Repo do curso completo do Matt. Tem exemplos de planos reais que ele usa em features de produção. Vale ler os PRs grandes pra ver como ele estrutura.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="sandcastle" url="https://github.com/mattpocock/sandcastle" autor="Matt Pocock" stars="4.7k">
+Projeto seed do Matt com convenções pra coding agêntico. Olha as PRs e issues pra ver planos no formato "objetivo + passos + critério" em ação.
+</FonteGratis>
+
+<FonteGratis tipo="doc" titulo="Claude Code docs: Plan mode" url="https://docs.claude.com/en/docs/claude-code" autor="Anthropic">
+Referência oficial do plan mode e dos comandos pra forçar planejamento antes de execução.
+</FonteGratis>

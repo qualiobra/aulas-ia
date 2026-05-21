@@ -1,0 +1,57 @@
+Você já usou o Claude.ai no navegador. Abre uma aba, digita uma pergunta, ele responde em texto. Bonito, útil, mas é uma conversa e nada mais. O Claude Code é outra coisa. Ele mora no seu terminal, enxerga seus arquivos, edita, roda comando, e te devolve o resultado real do trabalho feito. A diferença entre os dois não é "um é melhor", é categoria diferente de ferramenta.
+
+## O chatbot vive numa caixa
+
+Quando você conversa com o Claude.ai, ele não sabe nada do seu computador. Você cola um trecho de código, ele sugere uma versão melhor, você copia a sugestão, abre seu editor, cola no arquivo certo, salva, testa. Quatro passos manuais entre a ideia e o resultado. Se ele errar o caminho do arquivo, você que percebe. Se a sugestão quebrar outra parte do código, você que descobre depois.
+
+<AnalogiaObra titulo="O arquiteto que só fala por telefone">
+Imagina um arquiteto fenomenal, mas que nunca pisa na obra. Você liga, descreve o problema da viga, ele te dá a solução por voz, você desliga e tem que explicar pro mestre de obras o que ele disse. Se você anotou errado, a obra sai errada. Se o mestre interpretou diferente, problema. O arquiteto sabe tudo, mas tá longe demais pra acertar sozinho. Esse é o Claude.ai.
+
+Agora pensa num arquiteto que mora na obra, anda no canteiro, pega a trena, mede a viga, marca a parede, conversa com o pedreiro na hora. Erra menos porque tá vendo. Esse é o Claude Code.
+</AnalogiaObra>
+
+## O agente tem mão
+
+Claude Code é um agente. Quando ele "decide" fazer algo, ele realmente faz. Lê o arquivo `package.json` pra entender o projeto, abre o `src/components/Header.tsx` pra ver como tá escrito, edita a linha 42 trocando a função, salva, roda `npm test` pra ver se quebrou, lê a saída do teste, conserta se precisou. Tudo isso num turno só, sem você copiar e colar nada.
+
+Isso muda quem dirige a conversa. No chatbot você é o operário, ele é o consultor. No agente você é o mestre de obras, ele é o operário que entende o que você quer e executa. Você fala "refatora essa função pra ficar mais clara", ele lê, decide, edita, testa, te mostra o resultado.
+
+<Callout tipo="importa" titulo="Você deixa de digitar código">
+A mudança mental mais difícil pra quem nunca programou é entender que você não vai mais escrever código linha por linha. Você descreve o que quer, em português mesmo, e o agente escreve. Seu trabalho é dirigir, revisar e aprovar. Pensa em você como o engenheiro responsável que assina a ART, não o pedreiro que mistura o cimento.
+</Callout>
+
+## Por que isso pega de jeito quem tem TDAH
+
+Programar do zero exige você segurar muita coisa na cabeça ao mesmo tempo: sintaxe da linguagem, nome das variáveis, qual arquivo importa qual, onde foi que você escreveu aquela função. Pra quem tem TDAH isso é exaustão pura, porque a memória de trabalho não dá conta.
+
+O agente carrega esse peso por você. Você só precisa segurar a intenção. "Quero que o botão de salvar fique azul." "Quero que esse formulário valide o CPF antes de enviar." "Quero que o app mostre uma mensagem amigável quando der erro de rede." Frases curtas, decisões claras, ele cuida do resto. É como ter um estagiário fenomenal que nunca esquece nada e nunca reclama de você repetir.
+
+## Três coisas que o agente faz e o chatbot não
+
+Primeiro, ele lê seu projeto inteiro. Não precisa você colar arquivo, ele abre, navega entre pastas, monta o contexto sozinho. Segundo, ele edita no lugar. Não te dá um bloco de código pra colar, ele aplica a mudança no arquivo certo. Terceiro, ele roda coisas. Comando de teste, instalação de pacote, build, deploy. Você vê o resultado de verdade, não a promessa de que vai funcionar.
+
+<Callout tipo="armadilha" titulo="Tentação de tratar como chatbot">
+Você vai querer, no começo, escrever instruções gigantes tipo "me dá o código completo pra fazer X". Não faça. Peça o resultado, não o código. "Adiciona um campo de telefone no formulário de cadastro" é melhor que "me escreve o JSX de um input com type=tel". Deixa o agente decidir a melhor forma. Você revisa depois.
+</Callout>
+
+## O que muda quando você aceita o jogo
+
+Quando você para de tratar a IA como gerador de texto e começa a tratar como executor de tarefa, sua produtividade muda de patamar. Você passa de "preciso aprender a escrever código" pra "preciso aprender a descrever problemas com clareza". É uma habilidade muito mais próxima de gerenciar uma obra do que de operar uma máquina. Você já sabe fazer isso, só não sabia que dava pra aplicar em software.
+
+<Checkpoint>
+Você entendeu a diferença se conseguir explicar pra alguém em uma frase por que o Claude Code edita arquivos e o Claude.ai não. Se conseguir, também, dizer onde mora cada um (o agente no seu terminal, o chatbot no navegador). E se entender que seu papel mudou de digitar pra dirigir.
+</Checkpoint>
+
+## Pra ir mais fundo
+
+<FonteGratis tipo="doc" titulo="Documentação oficial do Claude Code" url="https://docs.claude.com/en/docs/claude-code" autor="Anthropic">
+A página inicial da doc explica o que é o agente, como instala, e mostra os primeiros comandos. Leia a seção de overview com calma, ignore os trechos técnicos por enquanto.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="Dictionary of AI Coding" url="https://github.com/mattpocock/dictionary-of-ai-coding" autor="Matt Pocock" stars="1.7k">
+Glossário curto e direto dos termos que você vai ouvir o tempo todo. Útil pra consultar quando alguém falar "agente", "tool call", "context window" e você quiser confirmar o que é.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="Skills do Matt Pocock" url="https://github.com/mattpocock/skills" autor="Matt Pocock" stars="98k">
+Coleção de receitas prontas que ensinam o agente a fazer tarefas específicas. Vai fazer mais sentido nas próximas lições, mas vale dar uma olhada na estrutura pra ver que é só texto, não código.
+</FonteGratis>

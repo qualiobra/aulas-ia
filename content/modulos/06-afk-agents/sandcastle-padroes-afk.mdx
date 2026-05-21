@@ -1,0 +1,150 @@
+Fechando o módulo com a estrela: **sandcastle**. É um padrão de organização de pastas, criado pelo Matt Pocock, pra fazer agente trabalhar AFK de forma sustentável. Sem milagre, sem framework pesado, é literalmente três pastas e um loop.
+
+A ideia é simples: você joga tarefas numa fila, o agente puxa uma, executa, escreve relatório, e arquiva. Você revê quando voltar pro teclado.
+
+## A estrutura básica
+
+Três pastas dentro de uma pasta-pai (`sandcastle/`, por exemplo):
+
+```
+sandcastle/
+  incoming/
+  working/
+  done/
+```
+
+Cada **tarefa** é uma pasta dentro de uma dessas três. O nome da pasta da tarefa é descritivo: `001-fix-bug-cache-invalidation`, `002-refactor-useTransactions`, etc.
+
+Dentro da pasta da tarefa tem pelo menos um arquivo: `task.md`, descrevendo o que fazer. Pode ter outros (anexos, screenshots, contexto extra).
+
+<AnalogiaObra titulo="Bandeja de pedidos numa cozinha">
+Imagina cozinha de restaurante. Tem três lugares:
+
+- **Bandeja "entrou"** (incoming): pedidos novos que chegaram do garçom.
+- **Bancada "trabalhando"** (working): pedidos sendo preparados agora.
+- **Janela "saiu"** (done): pratos prontos, com a comanda anexada, esperando o garçom levar.
+
+O cozinheiro pega da bandeja de entrada, move pra bancada, prepara, e empurra pra janela com a comanda preenchida (tempo de preparo, observações, alterações que fez). O dono do restaurante chega no fim do dia, lê todas as comandas da janela, e sabe exatamente o que rolou.
+
+Sandcastle é isso. As pastas são a bandeja, a bancada e a janela. O relatório (`report.md`) é a comanda preenchida.
+</AnalogiaObra>
+
+## O loop AFK
+
+O agente segue um ciclo:
+
+1. **Pega tarefa.** Olha `incoming/`, escolhe a primeira (ou a marcada como prioritária). Move a pasta inteira pra `working/`.
+2. **Executa.** Lê `task.md`, faz o que está pedido. Pode rodar testes, ler arquivos, editar código.
+3. **Escreve relatório.** Cria `report.md` dentro da pasta da tarefa. Estrutura: o que fiz, arquivos tocados, testes que rodaram, dúvidas que ficaram, próximo passo sugerido.
+4. **Move pra done.** A pasta inteira (com `task.md` original + `report.md` novo) vai pra `done/`.
+5. **Volta ao passo 1** se ainda tem tarefa em `incoming/`. Se não tem, para e avisa.
+
+Você volta do almoço, abre `done/`, lê os `report.md`. 5 tarefas processadas. Você revê, aprova, ou manda corrigir.
+
+## Por que essa estrutura funciona
+
+Três motivos:
+
+1. **Estado visível no filesystem.** Você bate o olho na pasta, sabe o que está rolando. Sem dashboard, sem banco de dados, sem ferramenta nova.
+2. **Atomicidade.** Mover pasta de `working/` pra `done/` é uma operação só. Se o agente crashar no meio, você sabe exatamente onde parou (a tarefa ficou em `working/`, dá pra retomar).
+3. **Audit trail.** `done/` vira teu histórico. Daqui a 6 meses você abre `done/047-...` e lê o relatório do que o agente fez. Memória institucional.
+
+<Callout tipo="importa" titulo="AFK não é 'sem humano'">
+Repete comigo: AFK significa "humano não está olhando agora". **NÃO** significa "humano nunca vai olhar". O passo 5 (você revisar `done/` depois) é obrigatório. Sem revisão, sandcastle vira coletor de lixo: agente faz coisa errada, ninguém vê, problema explode lá na frente.
+</Callout>
+
+## Anatomia de uma boa `task.md`
+
+```markdown
+# Tarefa: Adicionar paginação em /api/transactions
+
+## Contexto
+Hoje o endpoint retorna todas as transações. Com 10k+ registros, fica lento.
+
+## Objetivo
+Aceitar query params `page` (default 1) e `pageSize` (default 50, max 200).
+Retornar `{ data, total, page, pageSize }`.
+
+## Restrições
+- Não pode quebrar chamadas existentes (se page/pageSize ausentes, retornar tudo igual antes).
+- Testes em `tests/api/transactions.test.ts` devem continuar passando.
+
+## Critério de pronto
+- Teste novo cobrindo paginação adicionado.
+- `npm test` passa.
+- `npm run lint` passa.
+```
+
+Boa task tem: contexto, objetivo, restrições, critério de pronto. Isso é o mesmo critério da Lição 1: escopo claro + critério verificável.
+
+## Anatomia de um bom `report.md`
+
+```markdown
+# Relatório: Paginação em /api/transactions
+
+## O que foi feito
+- Adicionado parsing de `page` e `pageSize` em `src/api/transactions.ts:42`.
+- Adicionado clamp de pageSize (1-200) em `src/api/transactions.ts:48`.
+- Adicionado teste de paginação em `tests/api/transactions.test.ts:115`.
+
+## Resultados
+- `npm test`: 47/47 passando.
+- `npm run lint`: 0 erros.
+
+## Dúvidas/decisões
+- Decidi retornar `total` via `COUNT(*)` separado (custa uma query extra). Alternativa seria `OVER()`, mas o ORM atual não suporta direto. Vale revisar.
+
+## Próximo passo sugerido
+- Atualizar frontend pra usar paginação (fora do escopo desta tarefa).
+```
+
+Reporte deve: descrever ação, mostrar prova (resultado de teste/lint), declarar decisão tomada, sugerir próximo passo.
+
+<ExercicioPratico numero={1} titulo="Monta tua primeira sandcastle" tempo="15min">
+1. Cria a estrutura no teu projeto:
+   ```
+   mkdir -p sandcastle/incoming sandcastle/working sandcastle/done
+   ```
+
+2. Cria 2 tarefas pequenas em `incoming/`:
+   - `001-adicionar-readme/task.md` com instrução de criar README.md básico.
+   - `002-organizar-imports/task.md` com instrução de organizar imports em todos `.ts` do `src/`.
+
+3. Manda o Claude Code rodar o loop sandcastle. Prompt sugerido:
+   > "Roda o ciclo sandcastle. Pega a primeira tarefa de `sandcastle/incoming/`, move pra `working/`, executa, escreve `report.md`, move pra `done/`, e parte pra próxima até `incoming/` ficar vazio."
+
+4. Vai tomar um café. Volta em 15 minutos. Lê os `report.md` em `done/`.
+
+Você acabou de operar teu primeiro fluxo AFK estruturado.
+</ExercicioPratico>
+
+## Variações úteis
+
+- **Pasta `blocked/`:** tarefa que precisa de input humano. Agente move pra cá em vez de chutar.
+- **Pasta `archive/`:** depois de revisado, você move de `done/` pra `archive/` pra manter `done/` limpo.
+- **Prioridade no nome:** `001-`, `002-`, etc. Ordem numérica = ordem de execução.
+
+<Callout tipo="proximaParada" titulo="Encerramento do módulo">
+Você fechou o módulo 6. O ciclo está completo: você aprendeu a planejar (módulo 4), a executar com feedback (módulo 5) e agora a delegar sem estar presente (módulo 6). Do começo do curso até aqui, você foi de "Claude Code é uma caixa preta" pra "Claude Code é um time de estagiários organizados que eu sei dirigir". Falta o último: o módulo 7 traz o humano de volta pro lugar certo do ciclo.
+</Callout>
+
+<Checkpoint>
+- Sandcastle = 3 pastas (`incoming/working/done/`) + 1 loop simples.
+- Tarefa = pasta com `task.md` (e depois `report.md`).
+- AFK = humano não olha agora, mas **revisa depois**. Sempre.
+- `task.md` precisa: contexto, objetivo, restrições, critério de pronto.
+- `report.md` precisa: ação, prova, decisão, próximo passo.
+- Filesystem é o dashboard. Sem ferramenta nova.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="mattpocock/sandcastle" url="https://github.com/mattpocock/sandcastle" autor="Matt Pocock" stars="4.7k">
+Repositório original do padrão. Vale clonar, ler os exemplos de `task.md` e `report.md` que ele commitou, e adaptar pro teu fluxo.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="mattpocock/skills" url="https://github.com/mattpocock/skills" autor="Matt Pocock" stars="98k">
+Skills do Matt incluem variações do padrão sandcastle empacotadas como skills reutilizáveis.
+</FonteGratis>
+
+<FonteGratis tipo="doc" titulo="AI Hero" url="https://www.aihero.dev" autor="Matt Pocock">
+Plataforma do Matt onde o curso original 'AI Coding for Real Engineers' mora. Lições mais profundas sobre AFK e workflows agênticos.
+</FonteGratis>

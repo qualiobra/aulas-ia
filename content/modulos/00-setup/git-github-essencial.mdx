@@ -1,0 +1,162 @@
+Antes do Claude Code virar uma máquina de fazer código pra você, precisa de um lugar pra **guardar e versionar** o que ele produz. Esse lugar é Git (no seu PC) + GitHub (na nuvem). Se você nunca usou nenhum dos dois, fica tranquilo: o curso inteiro precisa só do básico, e a gente vai mastigar.
+
+## Por que Git e GitHub importam aqui
+
+O Claude Code vai mexer em arquivos seus o tempo todo: criar, editar, apagar. Sem Git, você não consegue voltar atrás se ele fizer besteira. Com Git, cada "salvamento" (chamado de **commit**) é uma foto do projeto, e você consegue rebobinar quando quiser.
+
+GitHub é onde essa fita de fotos fica na nuvem. Backup, compartilhamento, e (mais pra frente no curso) o lugar onde a Iris vai ler issues e abrir PRs.
+
+<AnalogiaObra titulo="Git é o diário de obra, GitHub é o arquivo morto da empresa">
+  No canteiro você assina o RDO todo dia: "hoje concretamos a sapata S-12, fulano furou aqui,
+  ciclano errou ali". Isso é o **commit**. Se daqui a 3 meses o cliente perguntar "por que essa
+  fissura?", você abre o diário e descobre. **GitHub** é o arquivo central da empresa: todo
+  diário de toda obra fica lá, organizado, e os engenheiros de outros canteiros conseguem ler.
+  Sem diário, ninguém sabe o que aconteceu. Sem arquivo, o diário some quando a obra acaba.
+</AnalogiaObra>
+
+## Passo 1: instalar o Git no PC
+
+Abre o PowerShell (Windows) ou Terminal (Mac) e digita:
+
+```bash
+git --version
+```
+
+Se sair algo tipo `git version 2.45.x`, beleza, pula pro passo 2.
+
+Se der erro, baixa em [git-scm.com/downloads](https://git-scm.com/downloads). Próximo, próximo, instalar. **No Windows**, na tela "Adjusting your PATH environment", deixa marcado a opção do meio (Git from the command line and also from 3rd-party software). O resto é default.
+
+Depois de instalar, fecha e abre o terminal de novo. Roda `git --version` pra confirmar.
+
+## Passo 2: dizer pro Git quem você é
+
+O Git assina cada commit com seu nome e email. Configura uma vez só, vale pra sempre:
+
+```bash
+git config --global user.name "Seu Nome"
+git config --global user.email "seu-email@exemplo.com"
+```
+
+Usa o mesmo email que você vai usar no GitHub (próximo passo). Senão depois fica com commits "estranhos" sem foto vinculada.
+
+## Passo 3: criar conta no GitHub
+
+Vai em [github.com](https://github.com) e cria conta com o **mesmo email** do passo 2. Username livre (sugestão: alguma coisa profissional, tipo `lucas-araujo` ou `lucasaraujoeng`, porque vai aparecer em URLs públicas pelo resto da vida).
+
+Confirma o email, faz login.
+
+## Passo 4: autenticar (a parte chata, mas só uma vez)
+
+GitHub não aceita mais senha pelo terminal. Você precisa de um **Personal Access Token** (tipo uma senha descartável só pro Git) ou uma **chave SSH**. Pro curso, token é mais simples.
+
+1. Logado no GitHub, vai em **Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token (classic)**.
+2. Nome: `claude-code-curso`. Expiration: 90 dias (renova depois).
+3. Marca o escopo **repo** (acesso completo aos repositórios). Só isso por enquanto.
+4. Gera, copia o token (começa com `ghp_...`). **Guarda num lugar seguro agora**, ele só aparece uma vez.
+
+Na primeira vez que você fizer `git push` (passo 6), o terminal vai pedir usuário e senha. Usuário = seu username GitHub. Senha = cola o token.
+
+<Callout tipo="armadilha" titulo="Token não é senha do GitHub">
+  Quando o terminal pedir "Password", **não digita a senha que você usa pra logar no site**.
+  Cola o token (`ghp_...`). Se errar, o git rejeita e você acha que tá tudo quebrado.
+</Callout>
+
+## Passo 5: primeiro repositório local
+
+Cria uma pasta de teste:
+
+```bash
+mkdir obra-teste
+cd obra-teste
+git init
+```
+
+Esse `git init` transforma a pasta num repositório Git. Aparece uma pasta escondida `.git` (não mexa nela, é o cérebro do Git).
+
+Cria um arquivo qualquer. No terminal mesmo dá pra criar um README rapidinho. Se preferir, abre no Bloco de Notas e salva como `README.md` com o conteúdo:
+
+```markdown
+# Obra Teste
+Repositório de teste pro curso de AI Coding.
+```
+
+Agora os 3 comandos sagrados:
+
+```bash
+git status
+git add README.md
+git commit -m "primeiro commit: README inicial"
+```
+
+- `git status` mostra o que mudou.
+- `git add` marca o arquivo pra entrar no próximo commit.
+- `git commit -m "..."` tira a foto, com uma mensagem descrevendo o que foi feito.
+
+## Passo 6: jogar o repositório pro GitHub
+
+No GitHub, clica em **New repository** (botão verde). Nome: `obra-teste`. **Não marca** "Add a README" nem ".gitignore" nem licença, porque já tem um README local. Cria o repo vazio.
+
+Na próxima tela, GitHub mostra um bloco "...or push an existing repository from the command line". Copia os 3 comandos e cola no terminal. Algo tipo:
+
+```bash
+git remote add origin https://github.com/SEU-USUARIO/obra-teste.git
+git branch -M main
+git push -u origin main
+```
+
+Na hora do push ele pede usuário/senha: cola o token. Pronto, atualiza a página do GitHub e o README tá lá.
+
+<Callout tipo="dica" titulo="Salva o token no Windows Credential Manager">
+  No Windows, depois do primeiro push bem-sucedido, ele guarda o token no Credential Manager
+  automaticamente e nunca mais pede. No Mac, o Keychain faz o mesmo. Se quiser forçar, instala o
+  Git Credential Manager (vem junto com o Git for Windows por padrão).
+</Callout>
+
+## E SSH? Vou precisar?
+
+Pro curso, **não**. Token classic resolve. SSH é um upgrade que você pode fazer depois (mais seguro, sem precisar renovar token), mas adiciona uma camada de configuração que não vale a pena agora. Quando quiser, pesquisa "github ssh key setup" e segue o guia oficial.
+
+<Checkpoint>
+Você terminou esta lição quando:
+
+1. `git --version` funciona no terminal;
+2. `git config --global user.name` e `user.email` configurados;
+3. Conta no GitHub criada com o mesmo email;
+4. Token classic gerado e guardado;
+5. Pasta `obra-teste` com 1 commit local;
+6. Repositório `obra-teste` aparecendo no seu perfil do GitHub com o README dentro.
+
+Se travou no push (erro de autenticação), o problema é 90% das vezes token errado. Gera de novo, tenta de novo.
+</Checkpoint>
+
+## Fontes grátis pra esta lição
+
+<FonteGratis
+  tipo="doc"
+  titulo="GitHub Docs: Getting started with Git"
+  url="https://docs.github.com/en/get-started/getting-started-with-git"
+  autor="GitHub"
+>
+  Guia oficial passo a passo, em inglês mas com prints. Bom pra consultar quando der erro.
+</FonteGratis>
+
+<FonteGratis
+  tipo="doc"
+  titulo="Documentação Claude Code: integração com Git"
+  url="https://docs.claude.com/en/docs/claude-code"
+  autor="Anthropic"
+>
+  A doc oficial menciona em vários pontos como o Claude Code interage com repos Git. Vai virar
+  referência constante no curso.
+</FonteGratis>
+
+<FonteGratis
+  tipo="repo"
+  titulo="mattpocock/dictionary-of-ai-coding"
+  url="https://github.com/mattpocock/dictionary-of-ai-coding"
+  autor="Matt Pocock"
+  stars="1.7k"
+>
+  Dicionário do Matt com termos de AI coding. Bom pra bater o olho em palavras que vão aparecer
+  (commit, PR, branch, diff). Não precisa ler tudo, só consultar.
+</FonteGratis>

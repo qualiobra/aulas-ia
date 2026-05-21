@@ -1,0 +1,108 @@
+Saber **que** precisa de checkpoint é metade. A outra metade é saber **como** fazer um checkpoint que serve pra alguma coisa. Porque checkpoint mal feito é pior do que não ter checkpoint: ele te dá a falsa sensação de controle enquanto você carimba "ok" no automático.
+
+Essa lição é sobre as quatro coisas que separam um checkpoint útil de um teatro.
+
+## Os quatro elementos do checkpoint que funciona
+
+Um bom checkpoint tem:
+
+1. **Uma pergunta clara e única.** Não três perguntas embaladas, uma só.
+2. **Opções A/B/C concretas.** Não "o que você acha?", mas "A: faço X, B: faço Y, C: paro e espero".
+3. **Um default seguro.** Se você não responder em N minutos ou responder com pressa, o que acontece? Tem que ser a opção mais conservadora.
+4. **Contexto suficiente pra você decidir em 30 segundos.** Não mais, não menos. Se tá levando 5 minutos pra entender a pergunta, o agente falhou em resumir.
+
+Falta qualquer um desses quatro, o checkpoint vira ruído.
+
+## Comparando: ruim vs bom
+
+**Checkpoint ruim:**
+
+> Vou prosseguir com a implementação. Confirma?
+
+Você não sabe o que ele vai fazer, não tem opções, não tem default. Você responde "sim" porque tá com pressa e descobre 10 minutos depois que ele rodou migration em produção.
+
+**Checkpoint bom:**
+
+> Pronto pra rodar a migration `2026_05_21_add_status_to_contatos.sql`. Ela:
+> - Adiciona coluna `status` (text, default 'ativo') na tabela `contatos`
+> - Não bloqueia escrita, mas pode demorar ~3s em 12k linhas
+> - É reversível com a migration `_down`
+>
+> Opções:
+> - **A**: rodo agora em produção (já testei em staging, passou)
+> - **B**: rodo só em staging de novo pra você ver os logs
+> - **C**: paro e me passa contexto adicional
+>
+> Se você não responder em 5min, default é **B** (não toco em prod sem ok).
+
+Agora você decide em 20 segundos, com base em fato. Esse é o padrão.
+
+<AnalogiaObra titulo="Liberação de etapa">
+Você não libera concretagem pelo WhatsApp com "manda concretar aí". Você libera olhando: a fôrma tá no nível? A ferragem tem o cobrimento certo? A bomba tá posicionada? O traço foi conferido?
+
+O mestre experiente já chega no checkpoint com **as respostas prontas**: "engenheiro, fôrma nivelada (laser confere), ferragem com 2,5cm de cobrimento (fotos anexas), bomba a 8m da laje, traço conferido com o caminhão. Tô pronto, posso liberar?".
+
+Esse "posso liberar?" vale ouro porque ele já te entregou os fatos. Você responde sim em 30 segundos, com consciência. **Checkpoint do agente é igual:** ele te entrega resumo factual, opções e default. Você libera ou não. Sem teatro.
+</AnalogiaObra>
+
+## Por que checkpoint mal feito é pior que ausência total
+
+Parece contraintuitivo, mas é assim:
+
+- **Sem checkpoint**, você sabe que tá no escuro. Vai revisar tudo depois, com cuidado.
+- **Com checkpoint ruim**, você acha que revisou. Carimbou. Seguiu. E quando der ruim, você vai cobrar de si mesmo "mas eu confirmei?". Sim. E confirmou sem entender.
+
+Checkpoint ruim transfere a responsabilidade do agente pra você, sem te dar a informação pra exercer essa responsabilidade. É o pior dos mundos.
+
+<Callout tipo="armadilha" titulo="O 'sim' automático">
+Se você tá respondendo "sim, prossegue" três vezes seguidas sem ler, dois cenários possíveis: ou o agente tá fazendo checkpoints onde não devia (ruído), ou tá fazendo mal (sem contexto). Os dois pedem ajuste no CLAUDE.md, não no seu reflexo.
+</Callout>
+
+## Como ensinar o agente a fazer checkpoint do jeito certo
+
+Coloca no `CLAUDE.md`:
+
+```
+## Como pedir minha confirmação (checkpoint)
+
+Quando você for parar pra perguntar antes de ação crítica, use ESTE formato:
+
+1. Resumo factual em 2-3 linhas (o que vai fazer, o que muda, impacto)
+2. Opções numeradas (A, B, C). C sempre é "paro e espero mais contexto"
+3. Default seguro: se eu demorar pra responder, qual opção você assume
+
+Não pergunte "posso prosseguir?" sem esse formato.
+Não pergunte mais de uma coisa por vez.
+```
+
+Esse parágrafo no `CLAUDE.md` muda a qualidade dos checkpoints em 100%. O Claude segue formato bem.
+
+## O default seguro existe pra te proteger do TDAH
+
+Pra você, Lucas, especificamente: o default não é luxo. Tem dia que você abre 4 conversas em paralelo, recebe ligação no meio, volta 40 minutos depois. Se o default é "parado", ótimo, nada explode. Se o default fosse "prossegue", você tinha um sistema diferente quando voltasse.
+
+Sempre que escrever um checkpoint (manual ou via CLAUDE.md), pergunta: **"e se eu sumir agora?"**. A resposta tem que ser a opção mais conservadora possível.
+
+<ExercicioPratico numero={1} titulo="Reescreve um checkpoint ruim" tempo="15min">
+Imagina o cenário: o agente tá pronto pra fazer deploy de uma feature nova de cobrança pro qualiobra. Ele escreve:
+
+> "Implementei a feature de cobrança. Quer que eu faça deploy?"
+
+Reescreve esse checkpoint usando os 4 elementos (pergunta clara, A/B/C, default, contexto em 30s). Anota num arquivo `meu-checkpoint-ideal.md` na pasta do projeto. Próxima vez que pedir feature parecida pro agente, cola esse formato no prompt e vê se ele copia o padrão.
+</ExercicioPratico>
+
+<Checkpoint>
+Você sabe agora que checkpoint útil = pergunta única + opções concretas + default seguro + contexto enxuto. E que checkpoint vago é pior que ausência. Próxima lição: o que fazer quando o agente **se** perde no caminho.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="skills" url="https://github.com/mattpocock/skills" autor="Matt Pocock" stars="98k">
+A coleção de skills do Matt tem exemplos de prompts e estruturas que o agente segue. Vale ver como ele escreve "human checkpoints" dentro de skills concretas.
+</FonteGratis>
+
+<FonteGratis tipo="doc" titulo="Claude Code Documentation" url="https://docs.claude.com/en/docs/claude-code" autor="Anthropic">
+Doc oficial. Procura "permission mode" e "hooks" pra ver como configurar pausas técnicas (não só prompts) antes do agente rodar comandos perigosos.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="sandcastle" url="https://github.com/mattpocock/sandcastle" autor="Matt Pocock" stars="4.7k">
+Tem exemplos de fluxos onde o agente pede aprovação antes de mover task de "working" pra "done". Bom pra ver checkpoint em contexto AFK.
+</FonteGratis>

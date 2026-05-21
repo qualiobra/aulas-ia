@@ -1,0 +1,170 @@
+## Diff é o boletim do agente
+
+Toda vez que o agente mexe num arquivo, ele te mostra um **diff**: o que tinha antes, o que ficou agora. Se você só olha o resumo dele em português ("atualizei a função X") e aperta aprovar, você não tá programando com IA. Tá rezando.
+
+Diff é onde mora a verdade. E é mais simples do que parece.
+
+## Como ler um diff em 30 segundos
+
+Um diff tem 3 coisas:
+
+- Linhas com **`-` (menos)**: linha que **saiu**. Era assim antes.
+- Linhas com **`+` (mais)**: linha que **entrou**. É assim agora.
+- Linhas sem nada na frente: **contexto**. Não mudou, tá ali pra você entender em que vizinhança a mudança aconteceu.
+
+Exemplo bobinho:
+
+```diff
+  function calculaCustoConcreto(volume) {
+-   return volume * 350;
++   return volume * 400;
+  }
+```
+
+Você lê assim: "antes multiplicava por 350, agora por 400. O resto da função tá igual". Pronto, leu um diff.
+
+## Hunks: pedaços do mesmo arquivo
+
+Quando o agente mexe em vários pontos do mesmo arquivo, o diff aparece em **hunks**. Cada hunk começa com algo tipo `@@ -42,7 +42,9 @@`. Tradução:
+
+- `-42,7`: a partir da linha 42 do arquivo antigo, mostra 7 linhas.
+- `+42,9`: a partir da linha 42 do arquivo novo, mostra 9 linhas.
+
+Não precisa decorar essa sintaxe. Só saber que **cada hunk é uma região independente**. Você revisa hunk por hunk, não tudo de uma vez.
+
+<AnalogiaObra titulo="Diff é o memorando de alteração de projeto">
+  Na obra, quando o projetista muda alguma coisa na planta, ele te manda um memorando de
+  alteração: "antes era pilar P12 de 25x25, agora vai ser P12 de 30x30. Resto da prancha
+  segue igual."
+
+  Você não joga fora a prancha inteira e refaz do zero. Você olha o memorando, entende a
+  mudança, confere se faz sentido com a estrutura, e aprova (ou pede pra revisar).
+
+  Diff é o memorando. + é o que entrou, é o que saiu, contexto é a parte da prancha
+  que ficou igual.
+</AnalogiaObra>
+
+## O checklist mental, na ordem
+
+Toda vez que aparece diff, passa por essa lista. No começo você passa lento. Depois fica automático.
+
+### 1. Nome de variável e função
+
+O agente, sob pressão, troca nome sutilmente. `userId` vira `user_id`. `obraAtiva` vira `obra`. Em JavaScript, isso quebra silencioso.
+
+Pergunta: **todo lugar que usava o nome antigo foi atualizado?** Se o diff só mostra mudança em 1 lugar mas a variável vivia em 5, suspeita.
+
+### 2. Lógica condicional (if / else)
+
+Olha cada `if` que mudou. Pergunta:
+
+- O caso "tudo certo" continua funcionando?
+- O caso "deu errado" continua funcionando?
+- E os casos do meio? Lista vazia, valor nulo, número zero, string vazia?
+
+A maioria dos bugs introduzidos por agente mora em **condição invertida** ou **caso esquecido**.
+
+### 3. Tratamento de erro
+
+Procura por `try`, `catch`, `throw`, `error`. Pergunta:
+
+- Se essa função falhar, alguém **vê** o erro?
+- O erro é capturado e simplesmente engolido (sem log, sem retorno)?
+- A mensagem de erro fala algo útil ou diz "Error"?
+
+Agente adora colocar `catch (e) {}` (catch que engole o erro sem fazer nada). Isso é bug com fita adesiva.
+
+<Callout tipo="armadilha" titulo="O catch fantasma">
+  Se você vê algo tipo `} catch (e) { /* ignore */ }` ou `} catch {} `, **pergunta antes de
+  aprovar**: "esse erro tem que ser logado ou exibido pro usuário?". 9 em 10 vezes a resposta é
+  sim, e o agente só colocou ali pra build parar de reclamar.
+</Callout>
+
+### 4. Side effects
+
+Side effect é qualquer coisa que sai do mundo da função e afeta o resto: escrever no banco, mandar email, chamar API, mexer em arquivo, mudar variável global.
+
+Pergunta: **essa mudança introduz um side effect novo?** Tá escrevendo no banco numa hora que antes não escrevia? Tá disparando email duas vezes? Tá deletando algo que antes só atualizava?
+
+Side effect novo em diff que não menciona = sinal vermelho.
+
+### 5. Importações e dependências
+
+No topo do arquivo: o agente adicionou `import` novo? De onde?
+
+- Importou de pacote npm que **não existia antes**? Significa que ele instalou (ou TENTA instalar) lib nova.
+- Importou de arquivo do projeto que **não existe**? Significa que ele acha que existe mas não existe. O build vai quebrar.
+- Importou versão default quando era named (ou vice-versa)?
+
+### 6. Testes (se o projeto tem)
+
+Se mexeu em função coberta por teste, o teste foi atualizado também? Ou ele "consertou o teste" mudando a expectativa pra passar (em vez de consertar o código)?
+
+<Callout tipo="importa" titulo="Teste comentado é bandeira vermelha">
+  Se você vê linhas tipo `// it.skip(...)` ou `// expect(...)` no diff, **para**. Ele desligou
+  teste em vez de fazer ele passar. Isso é dívida disfarçada de progresso.
+</Callout>
+
+## Os atalhos do Claude Code
+
+Quando o Claude Code te mostra diff e pede aprovação, você tem 3 opções:
+
+- **Aprovar** (`y`): aplica.
+- **Recusar** (`n`): descarta a mudança.
+- **Conversar**: digita explicando o que não tá bom, ele ajusta e mostra diff novo.
+
+A 3ª opção é a mais subutilizada. Você não precisa aceitar ou rejeitar como se fosse pegar ou largar. Você pode dizer "tá quase, mas o nome da função tá ruim, e o catch tá engolindo erro" e ele refaz.
+
+<ExercicioPratico numero={1} titulo="Lê 3 diffs com lupa" tempo="15min">
+Pega um projetinho qualquer (pode ser o `teste-claude` do módulo anterior, ou um repo que
+você tenha no GitHub). Roda o Claude Code dentro dele e pede 3 mudanças pequenas:
+
+1. "Renomeia a função X pra Y em todo o projeto."
+2. "Adiciona validação pra entrada Z não aceitar valor negativo."
+3. "Captura erros da função W e loga no console."
+
+Pra cada diff que aparecer, **NÃO aprova de cara**. Passa o checklist mental
+(nome de variável, condicional, tratamento de erro, side effect, import, teste).
+
+Anota uma coisa que você só percebeu **porque leu o diff devagar**. Quase sempre tem.
+</ExercicioPratico>
+
+<Checkpoint>
+Você terminou esta lição quando:
+
+1. Consegue explicar `+`, `-`, contexto e hunk pra alguém leigo.
+2. Sabe o checklist de 6 itens de cor (ou tem ele anotado num post-it na mesa).
+3. Identifica um `catch` que engole erro antes de aprovar.
+4. Já recusou pelo menos um diff e pediu pro Claude refazer, em vez de aprovar e consertar depois.
+</Checkpoint>
+
+## Fontes grátis pra esta lição
+
+<FonteGratis
+  tipo="doc"
+  titulo="Claude Code: fluxo de edição"
+  url="https://docs.claude.com/en/docs/claude-code"
+  autor="Anthropic"
+>
+  Docs oficiais. Procura a seção sobre como o Claude Code apresenta diffs e como aprovar/recusar.
+</FonteGratis>
+
+<FonteGratis
+  tipo="repo"
+  titulo="mattpocock/sandcastle"
+  url="https://github.com/mattpocock/sandcastle"
+  autor="Matt Pocock"
+  stars="4.7k"
+>
+  Tem PRs e commits pequenos que servem pra você treinar leitura de diff em código real.
+  Abre qualquer commit e tenta passar o checklist nele.
+</FonteGratis>
+
+<FonteGratis
+  tipo="post"
+  titulo="aihero.dev: guias práticos"
+  url="https://www.aihero.dev"
+  autor="AI Hero"
+>
+  Conteúdo escrito sobre AI coding com foco prático. Bom complemento pra fixar essas ideias.
+</FonteGratis>

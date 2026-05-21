@@ -1,0 +1,104 @@
+Até agora você teve um agente só. Você fala, ele responde, vai tudo no mesmo histórico. Sub-agente é diferente: é um trabalhador que você **contrata pra uma tarefa**, ele faz, ele volta com relatório, e some.
+
+A diferença prática que muda tudo: **sub-agente não vê seu histórico**. Ele começa do zero, com só o que você escreveu no prompt dele. Isso é uma vantagem enorme, mas exige um tipo específico de prompt.
+
+## O que é um sub-agente
+
+No Claude Code, o sub-agente é uma chamada da ferramenta `Task`. Você descreve o que quer, ele larga um agente novo com contexto isolado, esse agente trabalha, e devolve um resumo de texto pro agente principal. Pronto. Sem memória persistente entre chamadas.
+
+<Glossario termo="Sub-agente">
+Agente filho que roda em paralelo ao principal, com contexto totalmente separado. Recebe um prompt self-contained, executa, devolve relatório de texto. Não tem acesso ao histórico da conversa que o disparou.
+</Glossario>
+
+## Quando vale lançar um sub-agente
+
+Três critérios que o Matt repete:
+
+1. **3 ou mais lookups.** Você precisa que alguém leia 3+ arquivos, faça 3+ buscas, abra 3+ URLs. Atividade de pesquisa.
+2. **Leitura longa.** Documento de 800 linhas, log gigante, paper em PDF. Coisa que se ocupar seu contexto principal vai te atrapalhar depois.
+3. **Trabalho paralelo.** Você tem 3 perguntas independentes. Em vez de fazer em fila, dispara 3 sub-agentes ao mesmo tempo.
+
+<AnalogiaObra titulo="Estagiário de pesquisa">
+Pensa no sub-agente como estagiário que você manda fazer levantamento. Você fala: "Vai no almoxarifado, conta quantos sacos de cimento sobraram, mede a temperatura da câmara de cura e me traz a nota fiscal da última entrega de aço. Volta em 20 minutos com isso anotado em uma folha."
+
+Ele sai. Você continua tocando a obra. Ele volta com a folha. Você usa.
+
+O que você **não faz** é mandar o estagiário "ir lá ver as coisas e me contar". Vago demais. Ele vai voltar com tanto detalhe que você perde tempo filtrando, ou com pouca informação porque achou que outra coisa era mais importante. Sub-agente é igual: prompt vago, retorno inútil.
+</AnalogiaObra>
+
+## Prompt self-contained: a regra de ouro
+
+O sub-agente **não sabe nada do seu projeto**. Não sabe que você está fazendo um app de cobrança, não sabe que `src/contas/` é a pasta importante, não sabe que ontem você decidiu usar Postgres. Você precisa **escrever isso no prompt** dele.
+
+Prompt ruim:
+
+> "Procura o bug que estamos discutindo"
+
+Prompt bom:
+
+> "Você é um sub-agente de investigação. Contexto: app Next.js de cobrança em `C:\Users\lucas\dev\quali-cobranca`. Bug reportado: ao clicar em 'Marcar como pago' na lista de transações, o status muda mas a UI não atualiza. Hipótese atual: cache do React Query não está invalidando. Tarefa: leia `src/hooks/useTransactions.ts`, `src/components/TransactionList.tsx`, `src/pages/api/transactions/[id]/paid.ts`. Confirme se a query key usada no hook bate com a key invalidada na mutation. Reporte em até 200 palavras: arquivo:linha de cada query key encontrada, veredito (bate/não bate), próximo passo sugerido."
+
+Sente a diferença? O segundo prompt:
+
+- Localiza o projeto (caminho absoluto)
+- Diz o bug em uma frase
+- Diz a hipótese (foca o trabalho)
+- Lista os arquivos exatos pra ler
+- Define formato de saída (200 palavras, arquivo:linha, veredito)
+
+## Limite de palavras é obrigatório
+
+Se você não pede limite, o sub-agente vai te devolver um calhamaço. **Sempre peça relatório com limite**: 100, 200, 400 palavras. Forçar concisão obriga o sub-agente a destacar o que importa, e te poupa contexto.
+
+<Callout tipo="dica" titulo="Formato estruturado economiza contexto">
+Em vez de "me reporte o que achou", peça:
+- Achado 1: arquivo:linha: descrição em 1 frase
+- Achado 2: arquivo:linha: descrição em 1 frase
+- Veredito (1 frase)
+- Próximo passo (1 frase)
+
+O resumo vira escaneável, não narrativa.
+</Callout>
+
+## Paralelizar é onde está o ganho real
+
+A coisa fica boa quando você dispara **vários sub-agentes ao mesmo tempo**. O Claude Code executa em paralelo. Se cada um leva 2 minutos e você lança 3, em 2 minutos você tem 3 respostas. Sequencial seria 6.
+
+<ExercicioPratico numero={1} titulo="Lança 2 sub-agentes paralelos" tempo="15min">
+Escolhe um projeto seu que você está estudando. Lança 2 sub-agentes ao mesmo tempo (na mesma mensagem pro Claude Code) com tarefas independentes:
+
+**Sub-agente A:** "Leia `package.json` e `tsconfig.json` do projeto X. Liste em até 100 palavras: framework usado, target de TS, principais dependências de runtime (não dev)."
+
+**Sub-agente B:** "Leia o README.md e o primeiro arquivo de rota encontrado em `src/`. Liste em até 100 palavras: propósito do projeto em 1 frase, padrão de rota usado (App Router ou Pages), uma observação técnica.
+
+Os dois devem rodar em paralelo na mesma resposta do Claude. Cronometre. Compare com o tempo que levaria se você lesse esses arquivos um por um na sua sessão principal.
+
+Você vai ver duas coisas: 1) é rápido, 2) seu contexto principal ficou limpo, porque a leitura toda ficou no contexto descartado dos sub-agentes.
+</ExercicioPratico>
+
+<Callout tipo="armadilha" titulo="Sub-agente não enxerga sub-agente">
+Se você lança A e B em paralelo, **B não sabe o que A está fazendo**. Eles são irmãos sem comunicação. Se a tarefa de B depende da resposta de A, faça em sequência, não em paralelo.
+</Callout>
+
+## Quando NÃO usar sub-agente
+
+- **Pergunta curta de 1 arquivo.** É overhead. Você lê direto.
+- **Tarefa que muda código compartilhado.** Sub-agente que edita arquivo enquanto outro sub-agente edita o mesmo arquivo: caos. Use sub-agentes pra ler/investigar, e o principal pra escrever.
+- **Você ainda não sabe o que quer.** Sub-agente exige prompt preciso. Se a tarefa está nebulosa, refine no principal primeiro.
+
+<Checkpoint>
+- Sub-agente = trabalhador isolado, contexto zero, retorna texto.
+- Use quando: 3+ lookups, leitura longa, paralelizar.
+- Prompt deve ser self-contained: caminho, bug, hipótese, arquivos, formato de saída.
+- Sempre peça limite de palavras (100-400).
+- Paralelize tarefas independentes na mesma mensagem.
+- Sub-agente investiga e lê; agente principal escreve.
+</Checkpoint>
+
+<FonteGratis tipo="doc" titulo="Sub-agents docs (Anthropic)" url="https://docs.claude.com/en/docs/claude-code/sub-agents" autor="Anthropic">
+Documentação oficial da feature Task no Claude Code. Lista as opções disponíveis e os limites.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="mattpocock/skills" url="https://github.com/mattpocock/skills" autor="Matt Pocock" stars="98k">
+Coleção de skills do Matt, com exemplos práticos de prompts que disparam sub-agentes.
+</FonteGratis>

@@ -1,0 +1,166 @@
+## Pedido bom não é pedido educado
+
+Você não tá falando com estagiário. Tá falando com agente. Agente não se ofende, mas erra feio quando o pedido tá vago. Pedido bom é pedido **estruturado**. Quatro pedaços, sempre:
+
+1. **Objetivo**: o que tem que existir no fim.
+2. **Contexto**: onde isso vive, o que já tem.
+3. **Restrição**: o que não pode mudar, o que não pode usar.
+4. **Critério de pronto**: como você sabe que terminou.
+
+Falta um desses, o agente preenche sozinho. E preenche errado.
+
+## Comparando dois pedidos
+
+Vou mostrar o mesmo desejo escrito duas vezes.
+
+**Pedido vago:**
+
+```
+Cria uma tela de login.
+```
+
+Tá. Login de quê? Com email? Telefone? Tem cadastro? Vai pra onde depois que loga? Que cor? Já tem um arquivo de login que precisa atualizar ou cria do zero? O agente vai chutar tudo isso, e provavelmente vai fazer algo que você não quer.
+
+**Pedido bom:**
+
+```
+Objetivo: criar uma tela de login com email e senha.
+
+Contexto: o app já tem um auth via Supabase configurado em src/lib/auth.ts.
+A tela vai ficar em src/app/login/page.tsx e o usuario, depois de logar com
+sucesso, é redirecionado pra /dashboard.
+
+Restrição: não criar componente novo de input, usar o <Input> que já existe
+em src/components/ui/input.tsx. Não mexer no arquivo auth.ts.
+
+Critério de pronto: quando o usuário digita email/senha errados, aparece
+mensagem em vermelho. Quando acerta, redireciona pra /dashboard. Build sem
+erro de TypeScript.
+```
+
+Mesmo desejo. Resultado completamente diferente.
+
+<AnalogiaObra titulo="Pedido de obra pro empreiteiro">
+  Pensa que você liga pro empreiteiro e fala "faz o muro lá da frente". Ele vai chegar amanhã sem
+  saber altura, comprimento, se é bloco ou tijolo, se vai ter portão, se passa cano por dentro.
+  Ele vai chutar.
+
+  Agora pensa: "muro frontal, 12m de comprimento, 1,80m de altura, bloco cerâmico de 14cm,
+  já tem fundação corrida pronta, deixa abertura de 3m pro portão centralizado, prazo 5 dias,
+  pintar com tinta acrílica branca depois". Mesmo profissional, mesma obra, resultado outro.
+
+  Agente é igual empreiteiro: tão bom quanto o pedido que ele recebe.
+</AnalogiaObra>
+
+## Os 4 pedaços, um por um
+
+### Objetivo
+
+Uma frase. Verbo no infinitivo. Não enrola.
+
+Bom: "criar endpoint que retorna lista de obras ativas do usuário logado".
+Ruim: "queria que o sistema mostrasse as obras".
+
+### Contexto
+
+Onde mora o código, o que já existe, o que ele PRECISA saber pra não recriar tudo. Aponta arquivo: `src/...`. Aponta padrão: "segue o mesmo estilo do endpoint X". Aponta dependência: "usa o cliente Supabase em `lib/db.ts`".
+
+<Callout tipo="dica" titulo="Contexto não é tudo">
+  Contexto bom é o que ele precisa. Não cola o repositório inteiro. Próxima lição é sobre isso:
+  como dar contexto sem poluir.
+</Callout>
+
+### Restrição
+
+O que NÃO pode acontecer. Onde NÃO mexer. Pacote que NÃO pode entrar. Padrão que você quer manter.
+
+Exemplo: "não instala biblioteca nova, não mexe no schema do banco, mantém o estilo das outras páginas".
+
+Restrição é onde mora a maioria das brigas que você vai ter com o agente. Sem restrição, ele inventa solução elegante que destrói metade do que tava funcionando.
+
+### Critério de pronto
+
+Como você sabe que o trabalho acabou. Isso é o **definition of done** da obra:
+
+- Comando X roda sem erro.
+- Build passa.
+- Teste tal continua verde.
+- Tela mostra Y quando o usuário faz Z.
+
+Sem critério de pronto, o agente para no primeiro estado plausível. Você abre, tá quebrado, e ele diz "feito".
+
+<Callout tipo="armadilha" titulo="Critério vago não é critério">
+  "Funciona bem" não é critério. "Compila", "passa no teste", "abre sem erro no console", "salva
+  no banco" são critérios. Coisas que dá pra checar.
+</Callout>
+
+## Quando você não sabe alguma parte
+
+Acontece. Você não sabe ainda qual arquivo, qual padrão, qual restrição. Aí o pedido vira **pedido de investigação primeiro**:
+
+```
+Objetivo: entender como o login atual funciona antes de mexer.
+
+Contexto: o app já tem login, mas eu não sei direito onde.
+
+Critério de pronto: você me explica em 5 bullets onde fica o código,
+qual serviço usa, e quais arquivos eu teria que tocar pra mudar pra
+login com Google.
+```
+
+Esse padrão (pedir investigação antes de execução) é meio caminho da disciplina que separa quem usa agente bem de quem perde 3h pra reverter besteira.
+
+<ExercicioPratico numero={1} titulo="Reescreve um pedido vago" tempo="15min">
+Pega esse pedido aqui:
+
+```
+Faz uma página de relatório do mês.
+```
+
+Reescreve em formato estruturado (objetivo + contexto + restrição + critério de pronto). Inventa um contexto plausível (digamos que é um sistema de obra civil, com dados de RDO no Supabase). O exercício é praticar a forma, não acertar o conteúdo.
+
+Depois, joga os dois pedidos (o vago e o seu) no Claude Code, **em pastas vazias diferentes**, e compara o que ele faz. Anota a diferença.
+</ExercicioPratico>
+
+<Checkpoint>
+Você terminou esta lição quando consegue, sem olhar:
+
+1. Listar os 4 pedaços de um bom pedido.
+2. Explicar em uma frase o que cada pedaço resolve.
+3. Pegar um pedido vago que você mesmo escreveria e reescrever estruturado em menos de 2 minutos.
+4. Reconhecer um critério de pronto fraco ("funciona bem", "fica bonito") e melhorar.
+</Checkpoint>
+
+## Fontes grátis pra esta lição
+
+<FonteGratis
+  tipo="repo"
+  titulo="mattpocock/skills"
+  url="https://github.com/mattpocock/skills"
+  autor="Matt Pocock"
+  stars="98k"
+>
+  Repositório com skills bem estruturadas. Vale ler como o Matt redige as descrições. Cada skill
+  é, no fundo, um pedido estruturado pro Claude.
+</FonteGratis>
+
+<FonteGratis
+  tipo="repo"
+  titulo="dictionary-of-ai-coding"
+  url="https://github.com/mattpocock/dictionary-of-ai-coding"
+  autor="Matt Pocock"
+  stars="1.7k"
+>
+  Glossário curto dos termos que aparecem em AI coding. Bom pra fixar vocabulário enquanto a
+  gente avança no curso.
+</FonteGratis>
+
+<FonteGratis
+  tipo="doc"
+  titulo="Claude Code: best practices"
+  url="https://docs.claude.com/en/docs/claude-code"
+  autor="Anthropic"
+>
+  Docs oficiais. Tem seção específica sobre como estruturar prompts pro Claude Code. Lê devagar,
+  uma sessão de cada vez.
+</FonteGratis>

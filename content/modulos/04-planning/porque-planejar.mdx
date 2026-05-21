@@ -1,0 +1,85 @@
+Tem uma assimetria bonita em qualquer trabalho de construção: errar no papel custa borracha, errar na execução custa demolição. Em código com IA é igual. Se o Claude entender o problema errado e sair codando, você vai gastar 40 minutos pra ele te entregar uma feature que faz a coisa errada (mas faz muito bem). Se ele entender errado num plano de 6 linhas, você corrige em 30 segundos antes de uma linha de código existir.
+
+Esse é o ponto central deste módulo: **planejar é a etapa onde o erro é mais barato**.
+
+## A conta do erro
+
+Pensa em três momentos onde o agente pode estar errado:
+
+1. **No entendimento do problema** (antes do plano). Custo de corrigir: uma frase sua.
+2. **No plano** (depois que ele escreveu, antes de executar). Custo: um parágrafo seu apontando o que falta.
+3. **No código** (depois de executar 12 arquivos). Custo: ler diff, debugar, pedir refator, às vezes reverter tudo e recomeçar.
+
+A diferença de custo entre o nível 2 e o nível 3 é facilmente 20x. E o agente, sem freio, vai direto pro nível 3. Ele adora codar. É o que ele faz de mais barato (do ponto de vista dele, não do seu).
+
+## O que é Plan Mode
+
+O Claude Code tem um modo de operação chamado **Plan Mode**. Você ativa apertando `Shift+Tab` duas vezes no terminal (ou pedindo "entra em plan mode"). Nesse modo:
+
+- O agente **não escreve, não edita, não roda nada**. Só lê.
+- Ele explora o repositório, lê arquivos relevantes, e te devolve um plano em texto.
+- Você revisa. Se aprovar, ele sai do plan mode e executa. Se mandar corrigir, ele reescreve o plano.
+
+É um freio de mão. E é o freio mais importante que esse curso vai te ensinar.
+
+<AnalogiaObra titulo="Cronograma + projeto-executivo antes da fundação">
+Você não chega numa obra e fala pro mestre "constrói aí um sobrado de 180m²". Ele precisa do projeto arquitetônico, do estrutural, do hidráulico, do cronograma. Senão a parede da sala vai pra cima do esgoto, a escada vai bater na laje, e o pé direito do quarto vai dar 2,10m porque ninguém checou a viga.
+
+Plan mode é o projeto-executivo. O Claude lê a "planta do terreno" (seu código atual), entende o que você quer ("um sobrado com 3 quartos"), e te entrega o passo a passo: "vou abrir parede entre cozinha e sala, deslocar pia 80cm pra direita, refazer instalação elétrica nesses 2 circuitos". Você bate o olho e fala "espera, esse circuito alimenta a geladeira, não pode desligar de dia". Custo da correção: 10 segundos. Se ele já tivesse quebrado a parede, custo: refazer.
+</AnalogiaObra>
+
+## Por que isso importa mais com IA do que sem IA
+
+Quando você programa sozinho, planejamento ruim te dá mais ou menos o mesmo prejuízo de antes: você refaz, xinga, segue. Com IA é diferente porque a velocidade muda a escala do erro.
+
+O Claude consegue editar 8 arquivos em 2 minutos. Se ele entendeu errado, em 2 minutos você tem 8 arquivos errados. Sem plano, você acabou de gerar mais débito técnico em 2 minutos do que conseguiria em um dia digitando manualmente. A velocidade do agente **amplifica o custo de qualquer ambiguidade**.
+
+Plano não é burocracia, é proteção contra a própria velocidade da ferramenta.
+
+<Callout tipo="importa" titulo="A regra do dedo travado">
+Antes de aprovar qualquer plano, leia inteiro. Devagar. Se sentir aquele "ahh ele vai entender no caminho", trava o dedo. Esse "ele vai entender" é o som do prejuízo chegando. Pede pra ele detalhar o passo nebuloso antes de seguir.
+</Callout>
+
+## Quando NÃO planejar
+
+Pra ser justo: nem toda task pede plano formal.
+
+- **Mudar um texto de botão**: pede direto.
+- **Renomear uma variável**: pede direto.
+- **Corrigir um typo**: pede direto.
+- **"Adiciona um console.log aqui pra eu ver o valor"**: pede direto.
+
+Plan mode brilha quando: a mudança toca **2+ arquivos**, envolve **lógica nova**, mexe com **dados sensíveis** (auth, banco, pagamento), ou quando você **não está 100% certo do que quer**. Nesses casos, sempre plano antes.
+
+## O ciclo ideal
+
+O fluxo que você vai praticar nesse módulo é:
+
+1. **Você descreve o problema** (não a solução).
+2. **Claude entra em plan mode** e devolve um plano.
+3. **Você lê, critica, pede ajustes**.
+4. **Aprova explicitamente** ("ok, executa").
+5. **Claude sai do plan mode** e implementa.
+6. **Você revisa o diff** antes de commitar.
+
+A próxima lição vai destrinchar o que faz um plano ser bom (e o que faz um plano ser placebo).
+
+<Checkpoint>
+Você sai dessa lição entendendo três coisas:
+
+1. Erro no plano custa centavos, erro no código custa horas.
+2. Plan mode (`Shift+Tab` duas vezes) trava o agente em modo "só lê e propõe", sem executar.
+3. A velocidade do Claude amplifica qualquer ambiguidade, então plano é proteção, não burocracia.
+</Checkpoint>
+
+<FonteGratis tipo="doc" titulo="Claude Code docs (oficial)" url="https://docs.claude.com/en/docs/claude-code" autor="Anthropic">
+A doc oficial cobre plan mode, atalhos e o ciclo de aprovação. Boa pra confirmar comportamento quando você desconfiar.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="dictionary-of-ai-coding" url="https://github.com/mattpocock/dictionary-of-ai-coding" autor="Matt Pocock" stars="1.7k">
+Glossário curto dos termos que o pessoal usa em coding com IA. Tem verbete sobre plan mode e por que vale a pena.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="skills (Matt Pocock)" url="https://github.com/mattpocock/skills" autor="Matt Pocock" stars="98k">
+Coleção de skills do Matt. Várias delas dependem de um plano explícito antes de rodar. Ótimo pra ver o padrão "planejar > executar" aplicado em produção.
+</FonteGratis>

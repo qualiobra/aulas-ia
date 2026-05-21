@@ -1,0 +1,110 @@
+Tem dois jeitos do agente te decepcionar quando ele se perde. Um é desistir cedo demais: "Não consegui, me desculpa." Outro é insistir sozinho infinitamente, queimando tokens e contexto, tentando a mesma coisa de seis ângulos diferentes até você voltar 40 minutos depois e ver que ele tá no mesmo lugar. Os dois são falhas de **escalonamento**.
+
+Escalonar com elegância é uma habilidade que você ensina o agente a ter. Essa lição é sobre o padrão exato.
+
+## O sintoma do agente perdido
+
+Como saber que ele tá perdido? Sinais clássicos:
+
+- Tentou a mesma abordagem **2x ou 3x** e o teste/build continua falhando do mesmo jeito
+- Ficou pulando de hipótese em hipótese sem terminar nenhuma
+- Começou a "comentar lógica pra ver se passa o teste" (red flag enorme)
+- Tá adicionando `console.log` cada vez mais embaixo, sem se aproximar da causa
+- Mudou de arquivo 5 vezes em 3 minutos
+
+Quando você vê isso, ele **devia** ter parado por conta. Mas se ele não foi treinado pra parar, ele só continua. É por isso que você precisa instalar o padrão.
+
+## O padrão "resumo + 3 caminhos"
+
+O que você quer que o agente faça quando travar é simples e tem nome: **escalation com resumo estruturado**. Formato:
+
+```
+Tentei 3 abordagens e nenhuma resolveu. Vou parar e te passar o resumo:
+
+O QUE TENTEI:
+1. <abordagem 1>: resultado <o que falhou e como>
+2. <abordagem 2>: resultado <o que falhou e como>
+3. <abordagem 3>: resultado <o que falhou e como>
+
+HIPÓTESE ATUAL: <melhor palpite do que tá causando>
+
+PRÓXIMOS PASSOS POSSÍVEIS:
+A: <caminho 1, com custo/risco>
+B: <caminho 2, com custo/risco>
+C: <pedir ajuda específica ao Lucas: "preciso saber X">
+
+Não vou seguir até você escolher.
+```
+
+Esse formato faz três coisas: te economiza tempo (você não precisa ler todo o histórico), te dá opções concretas (você decide rápido), e força o agente a **organizar a própria confusão** (o ato de escrever o resumo já costuma destravar o pensamento dele).
+
+<AnalogiaObra titulo="Mestre de obra ligando do canteiro">
+Existem dois mestres. O mestre A te liga: "engenheiro, não tô conseguindo levantar essa parede". Você gasta 20 minutos perguntando o quê, onde, por quê. Pior caso, vai no canteiro.
+
+O mestre B te liga: "engenheiro, parede 3 do bloco B. Tentei prumo em três pontos, ela tá fora 2cm na vertical em todos. Conferi a fundação, tá nivelada. Conferi o esquadro do bloco, tá certo. Minha hipótese é que a primeira fiada saiu desnivelada e foi acumulando. Tenho três opções: A, quebro as 3 primeiras fiadas e refaço, 4h de trabalho. B, corrijo nas próximas fiadas com argamassa graduada, risco estético. C, chamo o calculista pra ver se aceita esses 2cm. Qual?".
+
+Você decide em 30 segundos. Mestre B é o agente bem treinado.
+</AnalogiaObra>
+
+## Quando escalar (e quando não)
+
+A regra que funciona bem:
+
+- **Falhou 1x:** tenta outra abordagem sem alarde.
+- **Falhou 2x:** começa a registrar mentalmente o padrão, mas ainda tenta.
+- **Falhou 3x:** **para, escala, não tenta mais sozinho**.
+
+Três é o número mágico porque: na primeira você não tem dados, na segunda você confirma que não é sorte, na terceira você tem padrão e é hora de pedir ajuda.
+
+<Callout tipo="importa" titulo="A diferença entre persistir e teimar">
+Persistir = tentar abordagens diferentes em busca da causa. Teimar = tentar variações da mesma abordagem que já falhou. Se o agente trocou 3 vezes de `console.log` mas continua olhando pro mesmo arquivo errado, ele tá teimando, não persistindo. Escala.
+</Callout>
+
+## Como instalar isso no CLAUDE.md
+
+Adiciona uma seção curta:
+
+```
+## Quando você ficar perdido
+
+Se você tentou 3 abordagens diferentes pro mesmo problema e nenhuma resolveu:
+
+1. PARA.
+2. Não tenta uma 4ª antes de falar comigo.
+3. Me dá um resumo no formato:
+   - O que tentei (3 abordagens, com resultado de cada)
+   - Hipótese atual do que tá causando
+   - 3 caminhos possíveis (A/B/C com custo)
+4. Espera minha decisão.
+
+Não vale: "tô tentando", "vou tentar mais uma coisa", "espera".
+Vale: o resumo estruturado acima.
+```
+
+Isso resolve 80% dos casos. Os outros 20% são quando o agente realmente não percebe que tá em loop. Aí entra você: quando você ver pelo terminal que ele tá girando, fala "para, escala usando o formato".
+
+## O outro extremo: desistir cedo demais
+
+Tem o oposto também, mais raro: o agente que na primeira falha já fala "não consegui". Isso geralmente vem de prompt curto demais ou de model muito conservador. Se acontecer, o ajuste é: "antes de me passar de volta, tente **pelo menos** 2 abordagens diferentes. Só escala depois disso".
+
+Equilíbrio: nem desiste na 1ª, nem teima na 5ª. **Três tentativas, depois escala**.
+
+<ExercicioPratico numero={1} titulo="Provoca uma escalation" tempo="15min">
+Pega um repo teu. Pede pro Claude resolver um bug **propositalmente mal descrito**, tipo: "tem alguma coisa quebrada no fluxo de cadastro, conserta". Sem mais contexto.
+
+Observa: ele escala bem? Tenta 1 vez e pergunta? Tenta 5 vezes em silêncio?
+
+Depois adiciona a seção "Quando você ficar perdido" no CLAUDE.md do projeto e repete o mesmo pedido. Compara o comportamento. Anota a diferença num post-it mental: esse é o ganho do prompt bem feito.
+</ExercicioPratico>
+
+<Checkpoint>
+Escalar com elegância = resumo + hipótese + 3 caminhos + esperar resposta. Três tentativas é o gatilho. Você instala isso no CLAUDE.md e o agente passa a se comportar como mestre de obra experiente, não como estagiário desesperado.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="sandcastle" url="https://github.com/mattpocock/sandcastle" autor="Matt Pocock" stars="4.7k">
+Repo do Matt com exemplos de "agentic patterns". Vale olhar como ele estrutura prompts onde o agente tem permissão (e instrução) de pedir ajuda.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="ai-hero-dev/ai-hero" url="https://github.com/ai-hero-dev/ai-hero" autor="Matt Pocock">
+Conteúdo de apoio do AI Hero. Olha em específico exemplos de prompts que demonstram o padrão "resumo + opções" quando o agente trava.
+</FonteGratis>

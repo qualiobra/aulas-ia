@@ -1,0 +1,141 @@
+## Contexto é gasolina. Lixo é fumaça.
+
+Todo mundo escuta "dá mais contexto pra IA" e sai colando tudo: o repositório inteiro, log de erro de 400 linhas, conversa antiga, três prints. O agente fica mais burro, não mais esperto. Porque contexto não é volume. Contexto é **sinal**.
+
+A regra mental que eu quero que você grave:
+
+> Contexto bom é o que ajuda ele a decidir. Contexto ruim é o que ele tem que filtrar pra achar o que importa.
+
+Cada token de lixo que entra é um token a menos que sobra pra ele pensar e responder.
+
+## A janela de contexto, explicada pro engenheiro
+
+Janela de contexto é o **tamanho da mesa** dele. Tudo que ele lembra na hora de decidir cabe nessa mesa. Quando enche, ele começa a esquecer as primeiras coisas. Ou pior: começa a misturar.
+
+<AnalogiaObra titulo="A mesa do engenheiro no canteiro">
+  Pensa na sua mesa no canteiro. Cabem uns 5 documentos abertos ao mesmo tempo: planta da
+  estrutura, planilha de medição, RDO da semana, contato do fornecedor, foto de detalhe.
+
+  Se você empilhar 40 documentos na mesa, você ainda **tem** tudo, mas pra responder
+  uma pergunta simples ("quanto que tô gastando em concreto?") você vai ter que ficar
+  cavando. E provavelmente vai errar, porque vai pegar a planilha do mês passado.
+
+  Janela de contexto do agente é igual. Mesa cheia de coisa irrelevante = ele cava, demora,
+  e erra. Mesa enxuta com o que importa = ele responde rápido e direito.
+</AnalogiaObra>
+
+Os modelos atuais têm janela grande (centenas de milhares de tokens). Parece muito. Mas:
+
+- Janela grande **não significa atenção uniforme**. O começo e o fim ele lê melhor. O meio ele atropela.
+- Cada token a mais aumenta a chance dele se confundir entre dois pedaços parecidos.
+- E em conversas longas, a janela enche **de verdade**. Aí ele esquece o que você falou no início.
+
+Conclusão: trate a mesa com respeito.
+
+## O que SEMPRE incluir
+
+- **Arquivo exato** que ele vai mexer. "Olha o `src/components/login-form.tsx`".
+- **Função/trecho relevante** se o arquivo é grande demais. Cola só o pedaço.
+- **Padrão de referência**. "Faz parecido com o que tá em `src/lib/auth.ts`".
+- **Restrição operacional**. "Estou no Windows", "uso pnpm não npm", "Node 20".
+- **Erro literal**, se for debug. Mensagem exata, stack trace, sem reescrever com suas palavras.
+
+## O que CORTAR
+
+- Histórico irrelevante. "Lembra que ontem a gente fez X?" Não. Ele não lembra, e mesmo que lembrasse, não importa pra essa task.
+- Arquivos inteiros quando você precisa só de 20 linhas.
+- Logs verbosos. Resume o erro, cola só o trecho com a mensagem.
+- Sua dúvida emocional. "Tô meio perdido, será que isso aqui é certo?" vira "explica o que essa função faz".
+- Repetição. Se você já disse o objetivo, não fala 3 vezes em formas diferentes.
+
+<Callout tipo="armadilha" titulo="O instinto de colar tudo é traiçoeiro">
+  Quando você não sabe direito o que tá errado, a tentação é colar o projeto inteiro pra ele
+  "descobrir". Não funciona. Ele se perde junto.
+
+  Faz o oposto: pergunta primeiro "olha o arquivo X e me diz qual é a função responsável por Y".
+  Depois você cola só o que ele apontou. Isso é dar contexto **dirigido**.
+</Callout>
+
+## Como o Claude Code lida com isso
+
+O Claude Code é esperto: ele lê o `CLAUDE.md` (instruções permanentes do projeto), lê os arquivos que você cita, e tem ferramentas pra **buscar** no projeto sem você precisar colar nada.
+
+Isso significa que, ao invés de colar 5 arquivos, você fala:
+
+```
+Procura no projeto onde tá implementado o cálculo de custo do RDO.
+Depois me explica em 3 bullets como funciona.
+```
+
+Ele busca, lê, e responde. Você não polui a janela com 5 arquivos. Você usa **o sistema** dele pra trazer só o relevante.
+
+## A regra dos 3 itens
+
+Toda vez que for mandar contexto, pergunta:
+
+1. **Esse item ajuda a decidir?** Se não, corta.
+2. **Esse item tá no nível certo de detalhe?** Arquivo inteiro quando bastava função, corta.
+3. **Esse item vai poluir o resto da conversa?** Mensagem de erro de 80 linhas, resume.
+
+Se passou nos 3, manda.
+
+<Callout tipo="dica" titulo="CLAUDE.md é seu amigo">
+  Tudo que vale pra TODA conversa no projeto (qual stack, qual gerenciador de pacote, qual padrão
+  de pasta, o que não tocar) vai no `CLAUDE.md`. Você escreve uma vez, ele lê em toda sessão.
+  Isso libera a janela pra coisa nova.
+</Callout>
+
+<ExercicioPratico numero={1} titulo="Limpa o teu próximo pedido" tempo="15min">
+Abre uma conversa no Claude Code (ou no claude.ai mesmo). Pega uma pergunta real sua sobre
+um projeto teu (ou inventa: app de RDO em Next.js + Supabase).
+
+Escreve a versão "natural" do pedido, do jeito que sairia. Cola arquivo, despeja contexto, etc.
+
+Agora reescreve, aplicando a regra dos 3 itens. Conta os tokens? Não precisa. Mas
+visualmente: quantas linhas a versão limpa tem comparada à suja?
+
+Manda as duas em conversas separadas e compara: ele responde melhor na suja ou na limpa?
+Aposta na limpa.
+</ExercicioPratico>
+
+<Checkpoint>
+Você terminou esta lição quando:
+
+1. Consegue explicar com suas palavras o que é janela de contexto, usando a analogia da mesa.
+2. Sabe listar 3 coisas que SEMPRE incluir e 3 que SEMPRE cortar.
+3. Pega um pedido próprio cheio e enxuga pra menos da metade do tamanho sem perder o essencial.
+4. Sabe quando usar `CLAUDE.md` em vez de repetir contexto na conversa.
+</Checkpoint>
+
+## Fontes grátis pra esta lição
+
+<FonteGratis
+  tipo="doc"
+  titulo="Claude Code: gerenciamento de contexto"
+  url="https://docs.claude.com/en/docs/claude-code"
+  autor="Anthropic"
+>
+  Docs oficiais. Procura a seção sobre `CLAUDE.md` e sobre como o Claude lida com arquivos
+  grandes. Lê uma vez, volta depois.
+</FonteGratis>
+
+<FonteGratis
+  tipo="repo"
+  titulo="ai-hero-dev/ai-hero"
+  url="https://github.com/ai-hero-dev/ai-hero"
+  autor="AI Hero"
+>
+  Tem exemplos práticos de como estruturar contexto pra agente. Não tenta ler tudo. Pega
+  um exemplo, lê, fecha.
+</FonteGratis>
+
+<FonteGratis
+  tipo="repo"
+  titulo="mattpocock/sandcastle"
+  url="https://github.com/mattpocock/sandcastle"
+  autor="Matt Pocock"
+  stars="4.7k"
+>
+  Sandbox que o Matt usa pra demonstrar padrões de prompt e contexto. Boa referência pra ver
+  contexto bem estruturado na prática.
+</FonteGratis>

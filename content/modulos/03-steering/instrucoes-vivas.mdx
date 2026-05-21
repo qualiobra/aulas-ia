@@ -1,0 +1,103 @@
+Você escreveu seu `CLAUDE.md`, escreveu uma ou duas skills. Funcionou bem por uma semana. Aí o projeto evoluiu: trocou Supabase por Postgres direto, mudou o padrão de nome de arquivo, descobriu que aquela regra do TypeScript estava te atrapalhando mais do que ajudando. E o `CLAUDE.md` continua lá, **mentindo** pro agente.
+
+Isso é o que o Matt chama de **instrução fóssil**: regra que era verdade um dia e virou peso morto. Pior que não ter regra, porque o agente obedece com confiança a uma orientação errada.
+
+## O ciclo natural de uma instrução
+
+Toda instrução passa por 4 fases:
+
+1. **Nasce**: você escreve baseado no que sabe agora.
+2. **Vigora**: o agente obedece, você confirma que tá ajudando.
+3. **Diverge**: o projeto muda, a regra deixa de bater com a realidade.
+4. **Fossiliza ou evolui**: ou você atualiza, ou ela vira lixo confuso.
+
+A maioria das pessoas para no passo 2. Escreve, vê funcionando, vai embora. Seis meses depois o `CLAUDE.md` tá cheio de regras que ninguém mais segue (nem deveria seguir), e o agente fica tropeçando.
+
+<AnalogiaObra titulo="Memorial desatualizado é pior que não ter memorial">
+Na obra, se o memorial descritivo diz "usar bloco cerâmico de 14x19x39" mas a obra inteira foi tocada com bloco de 9x19x39 porque o fornecedor mudou, qualquer fiscal ou perito que abrir esse memorial vai questionar tudo. O documento desautoriza a obra.
+
+Pior: se entra um pedreiro novo seguindo o memorial à risca, ele vai pedir bloco de 14 que não existe no almoxarifado e vai travar o serviço.
+
+Instrução fóssil no `CLAUDE.md` faz o mesmo: trava o agente, ou pior, ele segue confiante uma regra que já era.
+</AnalogiaObra>
+
+## O ciclo de atualização (3 momentos)
+
+Vou te dar três gatilhos pra atualizar. Não precisa ser cerimonioso.
+
+### 1. Em tempo real (o melhor)
+
+O agente errou. Você corrigiu. Antes de fechar a sessão, pergunta: "essa correção tinha como estar no `CLAUDE.md`?".
+
+Exemplo prático: o agente sugeriu commitar um `.env`. Você corrigiu. Vai no `CLAUDE.md` e adiciona uma linha em "Anti-padrões": `NAO commitar .env. Listar em .gitignore primeiro.`. Próxima sessão, ele já obedece.
+
+Esse é o ciclo virtuoso: o agente erra → você corrige → você grava a correção → próxima execução já obedece. Uma vez, e nunca mais aquele erro.
+
+### 2. No fim de cada feature grande
+
+Terminou uma feature de uma semana? Antes de fechar, abre o `CLAUDE.md` e lê de cabo a rabo. Pergunta pra cada item: "isso ainda é verdade?".
+
+Se você implementou uma feature trocando uma regra antiga, ela tá fóssil. Apaga ou reescreve.
+
+### 3. Skill review mensal (ou trimestral)
+
+Marca no calendário: dia 1 de todo mês, 30 minutos pra revisar `~/.claude/CLAUDE.md` e todas as suas skills.
+
+Não precisa reescrever nada. Só ler com olho clínico e perguntar:
+
+- Essa regra ainda bate com como eu trabalho?
+- Essa skill já foi usada nos últimos 30 dias? (se não, candidata a deletar)
+- Tem regra duplicada entre `CLAUDE.md` global e de projeto?
+- Tem regra contraditória?
+
+<Callout tipo="dica" titulo="O comando /memory ajuda">
+Dentro do Claude Code, `/memory` mostra exatamente quais arquivos estão carregados na sessão atual. Use ele no começo da revisão pra ver o que o agente está realmente lendo.
+</Callout>
+
+## Quando deletar (e não ter pena)
+
+Algumas situações em que **deletar é melhor que atualizar**:
+
+1. **A regra nunca foi usada**: você escreveu e em 3 meses o agente nunca precisou aplicar. Provavelmente já era óbvia ou irrelevante.
+2. **O projeto pivotou**: trocou de stack, de produto, de público. Reescreve do zero, não tenta remendar.
+3. **A regra contradiz outra mais nova**: a nova ganha. Mata a antiga.
+4. **A skill virou genérica demais**: gatilho dispara em tudo e o agente fica usando errado. Apaga e refaz com trigger mais específico.
+
+Não tenha apego. Instrução é meio, não fim.
+
+<Callout tipo="armadilha" titulo="O cemitério do CLAUDE.md">
+Tem gente que comenta a regra antiga com `<!-- desativado em 2026-03 -->` e deixa lá "pra histórico". **Não faça.** Vira lixo visual, o agente lê os comentários também e fica confuso. Histórico é o git. `CLAUDE.md` é só o que vale **agora**.
+</Callout>
+
+## Sinal de alerta: regra que você nunca lê
+
+Pergunta honesta: você releu seu `CLAUDE.md` na última semana?
+
+Se a resposta é não, e o arquivo tem mais de 50 linhas, tem ao menos uma regra fóssil ali. Garantido.
+
+A regra de bolso: **se você não consegue recitar 80% do seu `CLAUDE.md` de cabeça, ele está grande demais ou desatualizado**.
+
+<ExercicioPratico numero={1} titulo="Auditoria de instruções fósseis" tempo="15min">
+Abre seu `~/.claude/CLAUDE.md` (ou um do projeto). Pra cada bloco/linha:
+
+1. Lê em voz alta.
+2. Pergunta: "isso ainda é verdade hoje?".
+3. Marca com uma das tags:
+   - **MANTER**: vale, não mexe.
+   - **ATUALIZAR**: vale mas mudou (reescreve).
+   - **DELETAR**: não vale mais.
+
+No fim, conta. Se você marcou mais de 30% como `DELETAR` ou `ATUALIZAR`, seu arquivo estava em modo fóssil. Aplica as mudanças e roda uma sessão nova pra confirmar que o agente segue.
+</ExercicioPratico>
+
+<Checkpoint>
+Você sabe explicar: (1) o que é instrução fóssil, (2) os 3 gatilhos de atualização, (3) quando deletar é melhor que atualizar, (4) por que comentar regra antiga é pior que apagar. Se passou, fechou o módulo 03. Próximo módulo entra em tooling de verdade.
+</Checkpoint>
+
+<FonteGratis tipo="doc" titulo="Memory and CLAUDE.md (revisitar)" url="https://docs.claude.com/en/docs/claude-code/memory" autor="Anthropic">
+Vale revisitar a seção sobre `/memory` e edição inline. A doc mostra como editar o arquivo direto de dentro do Claude Code sem sair pro editor.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="mattpocock/sandcastle" url="https://github.com/mattpocock/sandcastle" autor="Matt Pocock" stars="4.7k">
+Repo de exemplo onde o Matt mantém seu próprio setup de skills e instruções. Olhe os commits recentes pra ver como ele edita, deleta e refatora regras ao longo do tempo. É a melhor referência de "instrução viva" na prática.
+</FonteGratis>

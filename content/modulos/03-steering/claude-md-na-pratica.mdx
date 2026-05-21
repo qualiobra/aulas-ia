@@ -1,0 +1,110 @@
+O agente é potente, mas ele acorda sem memória todo dia. Toda nova sessão começa do zero: ele não sabe se o projeto é Next.js ou Rails, não sabe que você odeia ponto e vírgula, não sabe que tem um banco Supabase ali do lado. Você teria que repetir isso toda vez. O `CLAUDE.md` resolve isso.
+
+## O que é o CLAUDE.md
+
+É um arquivo de texto comum, em Markdown, que o Claude Code lê **automaticamente** no começo de toda sessão. Funciona como um briefing fixo. Você escreve uma vez, ele lê sempre.
+
+Não tem mágica: é só texto. O agente trata o conteúdo como instrução de sistema, com prioridade alta. Se você escrever "nunca use `any` em TypeScript" lá, ele vai obedecer (e te lembrar quando você relaxar).
+
+## Onde mora
+
+Tem dois lugares principais:
+
+1. **Raiz do projeto** (`./CLAUDE.md`): regras específicas daquele código. Stack, padrões, comandos pra rodar testes, anti-padrões locais.
+2. **Home global** (`~/.claude/CLAUDE.md`): regras que valem pra **todos** os seus projetos. Estilo de comunicação, idioma preferido, ferramentas favoritas.
+
+O agente concatena os dois. O global serve de fundação, o do projeto manda em cima quando conflita.
+
+<Callout tipo="dica" titulo="Onde fica o home no Windows">
+No seu caso, Lucas, é `C:\Users\lucas\.claude\CLAUDE.md`. Você já tem um lá com as regras das Iris e do Superpowers.
+</Callout>
+
+## Estrutura recomendada
+
+Não tem template oficial obrigatório, mas funciona bem nessa ordem:
+
+1. **Contexto do projeto**: o que é, pra quem, em que stack.
+2. **Regras duras**: o que sempre fazer, o que nunca fazer.
+3. **Padrões**: como nomear, como estruturar, como testar.
+4. **Anti-padrões**: erros recorrentes que você quer travar.
+5. **Comandos úteis**: `npm test`, `supabase db push`, etc, pra ele não chutar.
+
+<AnalogiaObra titulo="É o memorial descritivo da obra">
+Imagina que você contrata um pedreiro novo toda segunda. Se você não deixar um memorial descritivo na obra, ele vai chegar e perguntar tudo de novo: qual o traço do concreto, qual a marca de cimento, onde fica o banheiro, qual o horário, pode usar caçamba na rua?
+
+O `CLAUDE.md` é esse memorial pregado no barracão. O agente "pedreiro" lê ao chegar e já sabe que aqui usa Portland CP-II, que o engenheiro responsável é Lucas, que o vizinho reclama de barulho depois das 17h, e que toda viga maior que 5m precisa de aprovação antes de concretar.
+</AnalogiaObra>
+
+## Exemplo curto (projeto fictício de obra)
+
+Imagina um projeto chamado `gestao-obra-vila-luiza`. Um `CLAUDE.md` enxuto seria assim:
+
+```markdown
+# gestao-obra-vila-luiza
+
+## Contexto
+Sistema interno pra acompanhar a obra da Vila Luiza (residencial, 8 unidades).
+Stack: Next.js 15 + Supabase + TailwindCSS.
+Usuario final: engenheiro de obra (Lucas) e mestre (Joao).
+
+## Regras
+- Toda data salva em UTC, exibida em America/Sao_Paulo.
+- Valores monetarios em centavos (integer), nunca float.
+- RDO (Relatorio Diario de Obra) e imutavel depois de assinado.
+- Nunca rodar migration em prod sem rodar local antes.
+
+## Padroes
+- Componentes em PascalCase: `RdoForm.tsx`.
+- Hooks com prefixo `use`: `useRdoSubmit`.
+- Tabelas Supabase em snake_case plural: `rdos`, `funcionarios`.
+
+## Anti-padroes
+- NAO usar `any` em TypeScript. Se nao souber o tipo, use `unknown`.
+- NAO escrever query SQL inline no componente. Vai pra `lib/queries/`.
+- NAO commitar `.env` (obvio, mas o agente as vezes tenta).
+
+## Comandos
+- Dev: `npm run dev`
+- Testes: `npm test`
+- Migration nova: `supabase migration new <nome>`
+```
+
+Em 30 linhas o agente já entende **mais** sobre o projeto do que um dev humano novo entenderia em uma reunião de meia hora.
+
+## Como o agente lê na prática
+
+Quando você abre o Claude Code no terminal dentro de um projeto, ele:
+
+1. Procura `CLAUDE.md` na raiz.
+2. Procura `~/.claude/CLAUDE.md` (global).
+3. Carrega os dois no contexto da sessão, antes da sua primeira mensagem.
+
+Você pode ver isso explicitamente rodando `/memory` no Claude Code. Ele lista quais arquivos estão ativos.
+
+<Callout tipo="armadilha" titulo="Não vire um livro">
+Tem gente que escreve `CLAUDE.md` de 2000 linhas achando que "quanto mais, melhor". Errado. O arquivo inteiro vai pro contexto **toda** sessão e gasta tokens. Mantém entre 100 e 400 linhas. Se passar disso, é sinal de que precisa virar `skill` (próxima lição).
+</Callout>
+
+<ExercicioPratico numero={1} titulo="Escreva seu primeiro CLAUDE.md de projeto" tempo="15min">
+Escolhe um projeto que você tem mexido (pode ser o `clawd-iris` mesmo, ou um repo de teste). Cria um `CLAUDE.md` na raiz com as 5 seções:
+
+1. Contexto (3 a 5 linhas).
+2. Regras (3 a 5 itens).
+3. Padrões (3 a 5 itens).
+4. Anti-padrões (2 a 3 itens).
+5. Comandos (3 a 5 comandos).
+
+Depois abre uma sessão nova do Claude Code naquele diretório e pergunta: "qual é o stack deste projeto e quais regras eu defini?". Se ele responder certo sem você ter mandado o arquivo, funcionou.
+</ExercicioPratico>
+
+<Checkpoint>
+Você consegue explicar pra um amigo: (1) onde mora o `CLAUDE.md`, (2) por que ele economiza tempo, (3) qual a diferença entre o do projeto e o global, (4) por que ele não pode virar enciclopédia. Se travou em algum, volta na seção.
+</Checkpoint>
+
+<FonteGratis tipo="doc" titulo="Memory and CLAUDE.md (docs oficiais)" url="https://docs.claude.com/en/docs/claude-code/memory" autor="Anthropic">
+Documentação oficial do Claude Code explicando memory, hierarquia de arquivos e o comando `/memory`. Leitura rápida (10min), vale ler inteira.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="dictionary-of-ai-coding" url="https://github.com/mattpocock/dictionary-of-ai-coding" autor="Matt Pocock" stars="1.7k">
+Glossário direto e seco dos termos que o Matt usa no curso. Procura por "steering", "memory", "context" pra reforçar o vocabulário.
+</FonteGratis>

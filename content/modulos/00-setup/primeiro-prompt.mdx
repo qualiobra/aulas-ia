@@ -1,0 +1,192 @@
+Você instalou Claude Code, configurou Git, tem conta no GitHub. Hora de **realmente usar** a ferramenta numa tarefa que vale alguma coisa. Nada de "hello world" idiota: a gente vai criar um README de uma obra fictícia, do jeito que um engenheiro civil faria, mas deixando o Claude redigir.
+
+O objetivo aqui não é o README ficar bonito. É você sentir o **ciclo completo**: prompt → proposta → diff → aceitar/recusar → resultado. Esse ciclo se repete o curso inteiro. Quem entende ele, anda. Quem não entende, trava.
+
+## O canteiro inicial
+
+Abre o terminal numa pasta nova:
+
+```bash
+mkdir obra-residencial-vila-nova
+cd obra-residencial-vila-nova
+git init
+claude
+```
+
+Quando o Claude carregar, ele mostra um prompt esperando você. Tá com o canteiro montado, vazio, esperando ordem.
+
+<AnalogiaObra titulo="Você é o engenheiro, ele é o estagiário esforçado">
+  O Claude Code é tipo um estagiário recém-formado que **não para de trabalhar**, escreve rápido,
+  conhece muita coisa, mas precisa de instrução clara e de você revisando antes de assinar.
+  Se você manda "faz aí", ele inventa. Se você manda "redige o RDO desta obra fictícia, com data
+  X, equipe Y, serviço Z executado", ele entrega coisa útil. Prompt curto e vago vira retrabalho.
+</AnalogiaObra>
+
+## Anatomia de um prompt útil
+
+Um prompt ruim:
+
+> faz um readme
+
+Um prompt útil tem 4 coisas:
+
+1. **Contexto**: o que essa pasta é, qual o cenário.
+2. **Tarefa**: o que exatamente você quer.
+3. **Restrições**: o que **não** fazer, ou formato esperado.
+4. **Saída**: onde vai o arquivo, qual nome, qual extensão.
+
+<Callout tipo="importa" titulo="Tempo gasto no prompt economiza tempo no diff">
+  30 segundos pensando no prompt valem 5 minutos não revisando código errado. Vale a regra:
+  se o prompt cabe numa linha só, geralmente tá raso demais.
+</Callout>
+
+## Sua primeira tarefa real
+
+Cola isso no Claude (pode adaptar números/nomes à vontade):
+
+```
+Quero um README.md para esta pasta, que representa o projeto de uma obra residencial fictícia
+chamada "Residencial Vila Nova".
+
+Dados da obra:
+- Endereço: Rua das Acácias, 312, Porto Velho/RO
+- Tipologia: 4 unidades autônomas de 95m² cada, 2 pavimentos
+- Prazo previsto: 14 meses (início: junho/2026)
+- Construtora: Araujo Empreendimentos
+- Responsável técnico: Eng. Civil Lucas Araújo
+
+O README deve ter:
+1. Título e subtítulo curto
+2. Seção "Visão Geral" com 2-3 parágrafos
+3. Seção "Cronograma macro" com tabela de fases (Fundação, Estrutura, Alvenaria,
+   Instalações, Acabamento, Entrega) e meses estimados
+4. Seção "Equipe-chave" com 3-4 cargos fictícios e nomes plausíveis
+5. Seção "Status" com data de hoje e "fase: planejamento"
+
+Português brasileiro, sem clichês de marketing. Markdown puro, sem HTML.
+Salva em README.md na raiz do projeto.
+```
+
+Aperta enter. O Claude vai pensar uns segundos e te mostrar o que pretende fazer.
+
+## O ciclo: proposta, diff, decisão
+
+O Claude **não escreve direto no disco** sem te mostrar antes (a não ser que você libere modo automático, coisa pra muito depois). O que aparece na tela é uma **proposta**:
+
+- Em **verde**: linhas que ele quer adicionar.
+- Em **vermelho**: linhas que ele quer apagar (não tem agora, README é novo).
+- Em **branco/cinza**: contexto inalterado.
+
+Embaixo da proposta, ele pergunta algo tipo "Apply this change? (y/n)".
+
+**Antes de apertar y**, você lê. Sério, lê. Não é firula, é o hábito que separa quem usa AI bem de quem vira refém dela.
+
+Coisas pra checar no README dele:
+
+- O endereço tá correto?
+- A tabela de cronograma tem 6 fases?
+- Algum nome inventado é estranho ou ofensivo?
+- Tem clichê de marketing ("inovador", "transformador", "sonho realizado") que você pediu pra evitar?
+
+Se tá bom: aperta **y**, ele cria o arquivo. Se tá ruim em algum ponto específico: aperta **n** e digita o ajuste:
+
+```
+A tabela ficou boa, mas tira a fase "Entrega" e adiciona "Limpeza fina" antes do final.
+E o nome do mestre de obras tá esquisito, troca por um nome mais comum.
+```
+
+Ele refaz a proposta. Aprova de novo. Ciclo.
+
+## Sair e voltar
+
+Pra sair do Claude: `Ctrl+C` duas vezes, ou digita `/exit`. A pasta continua lá, o arquivo continua lá. Quando você voltar (`claude` na mesma pasta), ele **lembra do contexto** porque lê o diretório de novo, mas **não lembra da conversa anterior** automaticamente. Conversa zerou. Isso é importante: cada sessão é um novo turno de trabalho.
+
+<ExercicioPratico numero={1} titulo="Faz o ciclo completo 2 vezes" tempo="20min">
+Roda o prompt acima e gera o README. Aprova.
+
+Depois, **na mesma sessão**, faz um segundo pedido encadeado:
+
+```
+Cria também um arquivo CRONOGRAMA.md com a mesma tabela do README, mas
+expandida: cada fase com 2-3 sub-etapas e duração em semanas (não meses).
+```
+
+Aprova a proposta. Confere o resultado.
+
+Sai do Claude (`/exit`). Faz commit dos dois arquivos:
+
+```
+git add README.md CRONOGRAMA.md
+git commit -m "estrutura inicial: README e cronograma da obra"
+```
+
+Pronto. Você acabou de produzir trabalho real com AI e versionar. Esse é o loop básico do curso inteiro.
+</ExercicioPratico>
+
+## Quando recusar uma proposta
+
+Recusa quando:
+
+- Ele quer mexer em arquivo que você **não pediu** pra ele mexer.
+- A mudança parece grande demais pra tarefa (200 linhas pra um ajuste pequeno).
+- Aparece algum comando suspeito (apagar tudo, instalar pacote estranho).
+- Você simplesmente não entendeu o que ele tá fazendo. **Não entender = recusar.** Pede pra explicar antes.
+
+<Callout tipo="armadilha" titulo="Aprovar no automático é o jeito mais rápido de quebrar o projeto">
+  No começo, você vai querer só apertar y pra ir rápido. Resiste. Cada y é uma assinatura sua
+  no diário de obra. Se quebrar amanhã, foi você que assinou.
+</Callout>
+
+## E se a resposta vier péssima?
+
+Acontece. Modelos têm dias bons e dias ruins, e prompts ruins geram saídas ruins. Não fica brigando 5 rodadas com o mesmo prompt. Faz uma das três:
+
+1. **Reformula**: dá mais contexto, restringe mais.
+2. **Recomeça**: `/clear` zera a conversa, começa do zero com prompt melhor.
+3. **Quebra em pedaços menores**: em vez de "faz README inteiro", pede uma seção por vez.
+
+<Checkpoint>
+Você terminou esta lição quando:
+
+1. Criou a pasta `obra-residencial-vila-nova` com `git init`;
+2. Rodou o Claude Code dentro dela;
+3. Gerou um README.md via prompt detalhado e revisou o diff antes de aprovar;
+4. Pediu pelo menos uma correção (mesmo pequena) e viu o Claude refazer;
+5. Gerou também o CRONOGRAMA.md no mesmo ciclo;
+6. Saiu do Claude, fez `git commit` dos dois arquivos.
+
+Se chegou até aqui, você já sabe mais sobre AI coding do que 90% do pessoal que só usou ChatGPT no navegador. Bom trabalho.
+</Checkpoint>
+
+## Fontes grátis pra esta lição
+
+<FonteGratis
+  tipo="doc"
+  titulo="Claude Code Docs: Quickstart e CLI reference"
+  url="https://docs.claude.com/en/docs/claude-code"
+  autor="Anthropic"
+>
+  Doc oficial. Tem a lista de comandos slash (`/clear`, `/exit`, etc), atalhos e como customizar.
+  Marca essa página, vai voltar muito.
+</FonteGratis>
+
+<FonteGratis
+  tipo="repo"
+  titulo="mattpocock/sandcastle"
+  url="https://github.com/mattpocock/sandcastle"
+  autor="Matt Pocock"
+  stars="4.7k"
+>
+  Padrão "AFK" do Matt: como deixar o Claude trabalhando sozinho com segurança. Não vai usar
+  agora (precisa do básico primeiro), mas dá uma olhada na intro do README pra ver pra onde
+  isso vai.
+</FonteGratis>
+
+<FonteGratis
+  tipo="post"
+  titulo="aihero.dev"
+  url="https://www.aihero.dev"
+  autor="Matt Pocock"
+>
+  Site oficial do Matt com posts curtos sobre AI coding. Bom pra ler de noite, 5-10 minutos cada.
+</FonteGratis>

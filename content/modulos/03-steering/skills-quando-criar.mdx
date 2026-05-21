@@ -1,0 +1,122 @@
+Você aprendeu na lição anterior que o `CLAUDE.md` deve ser enxuto. Mas e quando você tem um procedimento longo, com 15 passos, que só roda em situações específicas? Não cabe no `CLAUDE.md` (estoura contexto), mas você não quer reescrever toda vez. É aí que entra a **skill**.
+
+## O que é uma skill
+
+Uma skill é um **bloco reusável de instrução** que o agente carrega **só quando precisa**. Tem um nome, uma descrição curta ("quando usar"), e um corpo com o procedimento detalhado.
+
+Estrutura mínima:
+
+- **Nome**: identificador único (`fazer-rdo`, `revisar-pr`, `migrar-banco`).
+- **Descrição (trigger)**: uma frase que o agente lê pra decidir se aciona. Tipo "use quando o usuário pedir pra criar um RDO de obra".
+- **Corpo**: o passo a passo, exemplos, tools necessárias, ferramentas que pode chamar.
+
+Diferente do `CLAUDE.md` (que carrega sempre), a skill **fica dormente** até o gatilho disparar. Isso libera contexto.
+
+<AnalogiaObra titulo="Skill é PEIM ou FVS">
+Você conhece bem o PEIM (Procedimento de Execução para Insumos e Materiais) e a FVS (Ficha de Verificação de Serviço). São documentos detalhados, com 10 a 30 passos, pra um serviço específico: "concretagem de laje", "assentamento de bloco cerâmico", "instalação de hidráulica vertical".
+
+O pedreiro não carrega o PEIM da concretagem no bolso enquanto faz alvenaria, né? Ele pega o PEIM **só quando vai concretar**. O resto do tempo, o procedimento fica arquivado no barracão, à disposição.
+
+Skill é exatamente isso: o PEIM digital do agente. Dormindo no arquivo até precisar.
+</AnalogiaObra>
+
+## Quando vale criar (regra dos 3+)
+
+A heurística do Matt Pocock (e que bate com a minha experiência aqui): **só cria skill quando você já fez aquilo 3 vezes manualmente**.
+
+Antes de 3 usos:
+
+- Você ainda não sabe o formato certo do procedimento.
+- Você não viu as exceções, os casos de borda.
+- A skill vai sair errada e você vai gastar tempo refatorando ela.
+
+Depois de 3 usos:
+
+- Você já tem o padrão.
+- Já tropeçou nas pegadinhas.
+- Já sabe o que funcionou e o que não.
+
+Aí compensa investir 20 minutos pra escrever a skill direito.
+
+## Quando NÃO vale
+
+- **One-off**: "preciso renomear esta pasta uma vez". Faz direto, sem skill.
+- **Procedimento ainda em construção**: você não sabe se o passo 4 é melhor antes ou depois do passo 5. Vira skill quando estabilizar.
+- **Coisa óbvia que o agente já faz bem sozinho**: não precisa de skill pra "criar um arquivo TypeScript" ou "rodar um teste". Skill é pra workflows multi-passo com regras de negócio suas.
+- **Casos onde a regra muda toda semana**: skill virou peso morto. Mantém em prompt direto até estabilizar.
+
+<Callout tipo="armadilha" titulo="A tentação da skill prematura">
+Iniciante adora criar skill. Vê algo legal no GitHub, copia, cola, vira "agora tenho 30 skills". Resultado: o agente fica confuso, gatilhos se sobrepõem, contexto polui. Comece com **zero skills próprias** e cresça devagar. Uma skill nova só nasce quando você sente dor real de repetição.
+</Callout>
+
+## Exemplos que valem (no seu caso)
+
+Olhando seu workflow no `clawd-iris`:
+
+- **`fazer-rdo`**: você cria RDOs no qualiobra_bot. Tem 7 a 10 campos obrigatórios, regras de validação, formato Markdown específico. Já fez muitas vezes. **Vale.**
+- **`youtube-video-transcribe`**: você já tem essa. Procedimento multi-passo (yt-dlp + auto-sub + salvar em pasta + atualizar INDEX). **Vale**, e você já validou.
+- **`renomear-arquivo`**: óbvio, agente faz sozinho. **Não vale.**
+- **`debug-supabase-rls`**: se você cair em RLS policy 3 vezes, vale. Antes disso, não.
+
+## Como escrever uma skill (formato mínimo)
+
+A documentação do Claude Code aceita skill como pasta com `SKILL.md` dentro. Estrutura típica:
+
+```
+~/.claude/skills/fazer-rdo/
+  SKILL.md
+  templates/
+    rdo-padrao.md
+```
+
+`SKILL.md` começa com frontmatter declarando nome e trigger, depois o corpo:
+
+```markdown
+---
+name: fazer-rdo
+description: Use quando o usuario pedir pra criar um RDO (Relatorio Diario de Obra).
+---
+
+# Fazer RDO
+
+## Passo 1: coletar dados
+Pergunte: data, obra, clima manha/tarde, efetivo, atividades, ocorrencias.
+
+## Passo 2: validar
+- Data nao pode ser futura.
+- Efetivo nao pode ser zero (obra parada e RDO especial).
+- Ocorrencias vazio = "Sem ocorrencias" explicito.
+
+## Passo 3: gerar
+Use template em templates/rdo-padrao.md.
+Output: arquivo .md em projetos/<obra>/rdos/YYYY-MM-DD.md.
+
+## Passo 4: confirmar
+Mostra preview antes de salvar. Pergunta "assinar?".
+```
+
+Curto, direto, com passos numerados. Sem floreio.
+
+<ExercicioPratico numero={1} titulo="Identifique candidatas a skill no seu workflow" tempo="15min">
+Pega seus últimos 7 dias no Claude Code (memória, `mcp__history__recent`, ou só de cabeça). Lista todos os procedimentos repetidos que você executou.
+
+Pra cada um, marca:
+
+- Quantas vezes você fez? (se < 3, descarta)
+- O passo a passo tá estável? (se não, descarta)
+- Tem regras de negócio próprias suas? (se não, talvez não precise)
+
+No final, você deve ter de 0 a 3 candidatas legítimas. Não escreve nenhuma ainda. Só lista.
+</ExercicioPratico>
+
+<Checkpoint>
+Você sabe explicar: (1) diferença entre `CLAUDE.md` e skill, (2) a regra dos 3+ usos, (3) por que skill prematura atrapalha, (4) qual a anatomia mínima de uma skill. Se passou, próxima lição é sobre manter tudo isso vivo.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="mattpocock/skills" url="https://github.com/mattpocock/skills" autor="Matt Pocock" stars="98k">
+Coleção de skills prontas do Matt. Leia 3 ou 4 (curtas, tipo `commit-message`, `pr-review`) pra absorver o formato. Não copia pra sua máquina ainda: primeiro entenda, depois adapta.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="ai-hero-dev/ai-hero" url="https://github.com/ai-hero-dev/ai-hero" autor="AI Hero">
+Repo do curso completo do Matt. Procura a pasta de exemplos de skills aplicadas a contexto real de produto.
+</FonteGratis>

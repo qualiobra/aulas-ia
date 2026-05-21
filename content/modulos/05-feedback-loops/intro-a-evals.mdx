@@ -1,0 +1,107 @@
+Teste unitário funciona quando a saída é determinística. `2 + 2` sempre dá `4`. `formatarCPF('12345678900')` sempre dá `'123.456.789-00'`. Você compara com igualdade e acabou.
+
+Agora, e quando a "função" é uma chamada de LLM? `gerarResumo(emailLongo)` pode retornar texto diferente toda hora. Não tem string única certa. Mesmo assim, você precisa saber se o resultado tá bom. É aqui que entra eval.
+
+## O que é eval
+
+Eval é teste pra saída de LLM. A diferença pro teste unitário tradicional é que você não compara com igualdade exata. Você avalia qualidade.
+
+Pensa numa prova de redação. O professor não compara palavra por palavra com um gabarito. Ele pontua: tem introdução? Argumentação faz sentido? Conclusão amarra? Cada critério vira uma nota.
+
+Eval funciona igual. Você define critérios, dá entradas variadas pro LLM, e mede a qualidade da saída em cada critério.
+
+<AnalogiaObra titulo="Vistoria de acabamento">
+Pintura de parede não tem "certo" exato. Não dá pra falar "essa parede tem que estar com tinta na coordenada X igual a 0.5mm de espessura".
+
+O que o fiscal faz: olha contra a luz pra ver se cobriu uniforme. Passa a mão pra sentir se tá liso. Mede a cor pra ver se bate com a amostra. Cada critério é uma nota, e a parede passa se atende todos.
+
+Eval é a vistoria. O LLM cospe uma "parede" (texto, código, JSON) e você passa por critérios: tá no idioma certo? Cobriu o ponto pedido? Não inventou fato? Cada um é uma nota.
+</AnalogiaObra>
+
+## Por que isso importa pra você
+
+Se você tá só usando agente pra escrever código TypeScript, eval parece distante. Mas no momento que você começa a colocar LLM dentro do seu produto (resumir texto do cliente, classificar email, gerar resposta automática), você precisa de eval. Senão você sobe um prompt em produção sem saber se ele funciona pra 80% dos casos ou pra 10%.
+
+E mais: eval ajuda a iterar prompt. Você muda uma palavra no prompt, roda eval, vê se a nota subiu ou desceu. Sem eval, você "acha" que ficou melhor.
+
+## Como um eval se parece na cabeça
+
+Imagina que você tem um prompt que classifica email como `urgente`, `normal` ou `spam`. Pra avaliar:
+
+1. **Junta um dataset.** 50 emails reais, cada um já com a classificação correta marcada por você (a verdade).
+2. **Roda o prompt em cada um.** Anota o que o LLM respondeu.
+3. **Compara.** De 50, ele acertou 43. Acurácia 86%.
+4. **Muda o prompt.** Roda de novo. Agora acertou 47. Subiu pra 94%.
+5. **Decide.** Vale a pena trocar.
+
+Esse é o esqueleto. Pode ficar mais sofisticado (critérios múltiplos, LLM-as-judge, scores parciais), mas o coração é isso.
+
+<Callout tipo="importa" titulo="Eval não é opcional em produção">
+Você não precisa de eval pra brincar. Pra brincar, prompt direto e olho humano resolvem. Mas no momento que cliente paga pra usar uma feature LLM, eval é seguro de obra. Sem isso, você não tem como provar que mudou pra melhor nem que tá ruim.
+</Callout>
+
+## Evalite, a ferramenta que o Matt usa
+
+Pra rodar eval em projeto Node/TypeScript, o Matt Pocock fez o Evalite. É uma biblioteca focada em escrever eval do mesmo jeito que você escreve teste: arquivo `.eval.ts`, função `evalite`, dataset, scorer. Ele te dá um painel com os resultados, comparação entre rodadas e tudo mais.
+
+Não é o único. Tem Promptfoo, tem o eval do OpenAI, tem ferramenta da Anthropic. Mas Evalite é o que cabe melhor num projeto Next.js com TypeScript que você já tá usando, porque o ergonômico bate com o resto.
+
+## Um exemplo conceitual
+
+Pseudocódigo, não literal:
+
+```ts
+evalite('Classificador de email', {
+  data: [
+    { input: 'Reunião amanhã 9h', expected: 'normal' },
+    { input: 'PARABÉNS VOCÊ GANHOU IPHONE', expected: 'spam' },
+    { input: 'Servidor caiu, cliente sem acesso', expected: 'urgente' },
+  ],
+  task: async (input) => await classificarEmail(input),
+  scorers: [
+    {
+      name: 'acuracia',
+      score: ({ output, expected }) => output === expected ? 1 : 0
+    }
+  ]
+})
+```
+
+Aqui você tem dataset, task e scorer. Roda, vê score, ajusta prompt, roda de novo. É o ciclo TDD adaptado pra LLM.
+
+<Callout tipo="dica" titulo="Comece com 10 casos, não 1000">
+Tentação de novato é montar dataset gigante antes de começar. Não. Pega 10 casos representativos, escreve eval, roda. Vai aprendendo o que faz diferença. Cresce o dataset depois.
+</Callout>
+
+## O que não é eval
+
+Pra fixar:
+
+- **Não é teste unit.** Teste unit é igualdade exata. Eval é qualidade.
+- **Não é benchmark de modelo.** Benchmark mede modelos no abstrato. Eval mede o teu prompt no teu caso de uso.
+- **Não é monitoramento de produção.** Monitoramento olha o que tá rodando agora. Eval roda em dataset controlado antes de subir.
+
+Os três se complementam, mas são coisas diferentes.
+
+<ExercicioPratico numero={1} titulo="Desenha um eval no papel" tempo="15min">
+Sem instalar nada. Pega uma feature LLM hipotética do teu negócio (ex: "resumir relatório de obra em 3 bullets").
+
+1. Define o critério de qualidade. O que faz o resumo ser "bom"? Lista 2 ou 3 critérios.
+2. Inventa 5 entradas de teste. Pelo menos uma que é caso fácil e uma que é caso difícil.
+3. Pra cada entrada, escreve o que seria a saída ideal.
+4. Pensa em como você daria uma nota de 0 a 1 pra cada critério.
+
+Esse é o esqueleto do que vira código depois. Quando você tiver feito isso uma vez no papel, montar em Evalite é só sintaxe.
+</ExercicioPratico>
+
+<Checkpoint>
+Você entendeu que eval é teste pra saída de LLM, diferente de teste unit. Serve pra medir qualidade quando não tem resposta única certa. Evalite é a ferramenta que o Matt sugere pra projetos TypeScript. Não precisa instalar agora, mas precisa entender que vai precisar no momento que LLM virar parte do produto, não só da sua ferramenta de trabalho.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="Evalite" url="https://github.com/mattpocock/evalite" autor="Matt Pocock">
+Ferramenta de evals em TypeScript, ergonomia próxima de Vitest. Roda local, gera painel de comparação entre execuções.
+</FonteGratis>
+
+<FonteGratis tipo="doc" titulo="AI Hero (cursos e materiais)" url="https://www.aihero.dev" autor="Matt Pocock">
+Site do Matt com conteúdo aprofundado sobre evals, agentes e fluxos de LLM aplicados.
+</FonteGratis>

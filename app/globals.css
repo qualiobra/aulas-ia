@@ -1,26 +1,179 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Aulas IA · Design System (base Araújo, adaptado para web)
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Marca Araújo */
+  --brand-950: #0A1F3D;
+  --brand-900: #0F2E52;
+  --brand-800: #173C6E;
+  --brand-700: #1E4E89;
+  --brand-600: #2A6BAE;
+  --brand-500: #4A8BC8;
+  --brand-400: #6FA9D6;
+  --brand-300: #A9CFE5;
+  --brand-200: #CFE3F0;
+  --brand-100: #E4EEF7;
+  --brand-50:  #F1F6FB;
+
+  /* Status */
+  --ok-700:    #14694A;
+  --ok-600:    #1F8A5B;
+  --ok-100:    #E4F4EC;
+  --ok-50:     #F1F9F4;
+  --warn-700:  #92580A;
+  --warn-600:  #C77800;
+  --warn-100:  #FBEACC;
+  --warn-50:   #FDF4E2;
+  --danger-700:#8B2C2C;
+  --danger-600:#B43B3B;
+  --danger-100:#F7DDDD;
+  --danger-50: #FCEDED;
+
+  /* Neutros */
+  --ink-950: #06101D;
+  --ink-900: #0E1726;
+  --ink-800: #1B2738;
+  --ink-700: #2A3645;
+  --ink-600: #44505F;
+  --ink-500: #5A6A7C;
+  --ink-400: #7C8896;
+  --ink-300: #A4ADB8;
+  --ink-200: #C7CDD5;
+  --ink-100: #DEE3E9;
+  --ink-50:  #EEF1F4;
+
+  --line:      #DCE3EB;
+  --line-soft: #E8EDF2;
+  --bg-soft:   #F5F7FA;
+  --bg-cream:  #FAF8F4;
+  --bg:        #FFFFFF;
+
+  --font-sans: var(--font-jakarta), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-jetbrains), "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --background: var(--bg);
+  --foreground: var(--ink-900);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-brand-50:  var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-ink-50:  var(--ink-50);
+  --color-ink-100: var(--ink-100);
+  --color-ink-300: var(--ink-300);
+  --color-ink-500: var(--ink-500);
+  --color-ink-700: var(--ink-700);
+  --color-ink-900: var(--ink-900);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  font-family: var(--font-sans);
+  color: var(--ink-800);
+  background: var(--bg-soft);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   Tipografia do conteúdo MDX (prose)
+   ============================================================ */
+.prose {
+  color: var(--ink-800);
+  font-size: 17px;
+  line-height: 1.7;
+  max-width: 72ch;
 }
+.prose h1 { font-size: 2rem; font-weight: 800; color: var(--brand-900); margin: 2rem 0 1rem; letter-spacing: -0.02em; line-height: 1.2; }
+.prose h2 { font-size: 1.5rem; font-weight: 700; color: var(--brand-900); margin: 2.5rem 0 1rem; letter-spacing: -0.015em; line-height: 1.25; padding-bottom: 0.4rem; border-bottom: 2px solid var(--brand-100); }
+.prose h3 { font-size: 1.2rem; font-weight: 700; color: var(--brand-800); margin: 2rem 0 0.75rem; }
+.prose h4 { font-size: 1.05rem; font-weight: 700; color: var(--ink-900); margin: 1.5rem 0 0.5rem; }
+.prose p { margin: 0 0 1.1rem; }
+.prose strong { font-weight: 700; color: var(--ink-900); }
+.prose em { font-style: italic; }
+.prose a { color: var(--brand-700); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+.prose a:hover { color: var(--brand-900); }
+.prose ul, .prose ol { margin: 0 0 1.2rem; padding-left: 1.5rem; }
+.prose li { margin: 0.4rem 0; }
+.prose ul li::marker { color: var(--brand-500); }
+.prose ol li::marker { color: var(--brand-700); font-weight: 700; }
+.prose blockquote {
+  border-left: 3px solid var(--brand-500);
+  padding: 0.4rem 1rem;
+  margin: 1.5rem 0;
+  background: var(--brand-50);
+  color: var(--ink-700);
+  font-style: italic;
+  border-radius: 0 4px 4px 0;
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--ink-50);
+  color: var(--brand-900);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+}
+.prose pre {
+  background: var(--ink-900);
+  color: var(--ink-50);
+  padding: 1rem 1.2rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 1.5rem 0;
+}
+.prose pre code {
+  background: transparent;
+  color: inherit;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2rem 0;
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95em;
+}
+.prose th {
+  background: var(--brand-50);
+  color: var(--brand-900);
+  font-weight: 700;
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid var(--brand-300);
+}
+.prose td {
+  padding: 0.5rem 0.8rem;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-soft); }
+::-webkit-scrollbar-thumb { background: var(--ink-200); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }

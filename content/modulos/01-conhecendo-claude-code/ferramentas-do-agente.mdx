@@ -1,0 +1,76 @@
+O agente não faz mágica. Ele tem um cinto de ferramentas e usa uma de cada vez, te pedindo permissão antes. Saber o nome e a função de cada ferramenta é o que separa quem usa o Claude Code com confiança de quem usa com medo. São seis ferramentas principais. Você vai ver elas aparecerem em quase todo turno.
+
+## Read, Edit, Write: as três irmãs do arquivo
+
+A primeira coisa que um agente faz antes de mexer em qualquer coisa é ler. A ferramenta <Glossario termo="Read">Ferramenta do agente que abre um arquivo e devolve o conteúdo dele pro contexto da conversa. Sem Read, ele tá no escuro.</Glossario> abre um arquivo e mostra o conteúdo. É o equivalente do mestre de obras pegar a planta e olhar antes de furar a parede.
+
+Depois vem a Edit. Ela troca um pedaço específico do arquivo por outro. Não reescreve tudo, só o trecho que precisa. Isso é importante porque você quer mudanças cirúrgicas, não reformas completas.
+
+Write é a irmã mais arriscada. Ela cria um arquivo do zero ou sobrescreve um existente inteiro. Quando o agente usa Write num arquivo que já existe, ele apaga tudo que tava lá e coloca o novo conteúdo. Isso é poderoso e perigoso.
+
+<AnalogiaObra titulo="A trena, o martelo e a betoneira">
+Read é a trena. Você olha, mede, anota, mas não muda nada na obra. Pode usar à vontade, é só leitura.
+
+Edit é o martelo de unha. Você bate prego num lugar específico, conserta uma tábua, ajusta uma porta. Mudança pontual, no ponto certo, sem destruir o resto.
+
+Write é a betoneira virando concreto numa fôrma. Se a fôrma tava errada, era arriscado, agora tá concretado, era pra ficar pra trás. Por isso o agente prefere Edit quando dá, e só usa Write pra arquivo novo ou pra rewrite total quando você pediu.
+</AnalogiaObra>
+
+## Bash: o canteiro inteiro
+
+A ferramenta <Glossario termo="Bash">Linha de comando do sistema. O agente usa Bash pra rodar scripts, instalar pacotes, listar arquivos, abrir processos, basicamente pra fazer qualquer coisa que um programador faria digitando no terminal.</Glossario> executa comandos no seu computador como se você tivesse digitado direto no terminal. Roda `npm install`, `git status`, `ls`, `python script.py`, qualquer coisa.
+
+É a ferramenta mais poderosa do cinto. Também a mais perigosa, porque comando errado em Bash pode apagar arquivo, instalar coisa indevida, ou expor segredo. Por isso quase todo comando Bash dispara um pedido de permissão. Você lê o que ele quer rodar, confere, e libera ou nega.
+
+<Callout tipo="armadilha" titulo="Olhe o comando antes de aprovar">
+Quando o Claude Code te perguntar "posso rodar `rm -rf node_modules`?", leia. Esse comando é normal, apaga uma pasta de dependências que pode ser reinstalada. Mas se ele pedir `rm -rf /` ou `rm -rf ~`, você cancela na hora. Nem precisa saber programar pra perceber que algo agressivo demais tá rolando. Confia no instinto.
+</Callout>
+
+## Grep e Glob: o farejador
+
+Você tem um projeto com 500 arquivos. Onde tá a função que valida CPF? Em vez de abrir um por um, o agente usa Grep, que busca texto dentro dos arquivos, e Glob, que encontra arquivos pelo nome ou padrão.
+
+Grep responde "em quais arquivos aparece a palavra `validarCPF`?". Glob responde "quais arquivos terminam em `.test.ts`?". Juntos eles dão ao agente um mapa do projeto em segundos.
+
+Pra você isso significa que não precisa explicar onde fica nada. Diz "ajusta a validação de CPF" e ele acha sozinho. Como o engenheiro que chega na obra e em dez minutos já sabe onde tá cada caixa de luz, cada quadro de força, cada prumada de água.
+
+## A permissão é o seu freio de mão
+
+Toda ferramenta perigosa, e algumas que nem são tão perigosas, disparam um pedido de permissão antes de rodar. Você vê uma mensagem tipo "o agente quer editar `Header.tsx`, aprovar?". Você lê o diff (a diferença entre o que tá lá e o que ele quer escrever), aprova ou rejeita.
+
+Isso é a coisa mais importante de toda a stack. O agente não tem autonomia total. Ele propõe, você dispõe. Quem entende isso desde o primeiro dia trabalha relaxado. Quem trata como autopilot vai um dia ter dor de cabeça.
+
+<Callout tipo="importa" titulo="Você pode pré-aprovar comandos comuns">
+No arquivo de configuração do Claude Code você consegue marcar comandos seguros como sempre permitidos. Por exemplo, `npm test` ou `git status` não precisam te interromper toda vez. Comandos destrutivos, por outro lado, continuam pedindo. A configuração mora em `.claude/settings.json` e a gente vai ver isso num módulo mais à frente.
+</Callout>
+
+<ExercicioPratico numero={1} titulo="Identifique a ferramenta certa" tempo="10min">
+Abra um caderno (ou um arquivo de texto, tanto faz). Pra cada situação abaixo, escreve qual ferramenta o agente provavelmente vai usar. Não precisa rodar nada, é só treinar o reconhecimento.
+
+1. "Mostra o conteúdo do arquivo `README.md`."
+2. "Cria um arquivo novo chamado `notas.txt` com um título."
+3. "Instala o pacote `axios` no projeto."
+4. "Encontra todos os arquivos que contêm a palavra `senha`."
+5. "Troca o título da página de `Bem-vindo` pra `Olá, Lucas`."
+6. "Lista todos os arquivos da pasta `src/`."
+
+Depois confere com a tabelinha mental: ler = Read, criar arquivo novo = Write, instalar pacote = Bash, buscar palavra = Grep, trocar trecho = Edit, listar arquivos = Glob (ou Bash com `ls`).
+</ExercicioPratico>
+
+<Checkpoint>
+Você sabe que o agente tem ferramentas, não poderes mágicos. Reconhece as seis principais (Read, Edit, Write, Bash, Grep, Glob) e entende o papel de cada uma. Sabe que a permissão é o seu controle, não um incômodo, e que você pode (e deve) ler o diff antes de aprovar mudanças em arquivo.
+</Checkpoint>
+
+## Pra ir mais fundo
+
+<FonteGratis tipo="doc" titulo="Tools no Claude Code" url="https://docs.claude.com/en/docs/claude-code" autor="Anthropic">
+A doc oficial detalha cada ferramenta, com exemplos de quando o agente escolhe uma ou outra. Não precisa decorar, mas vale folhear.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="Skills do Matt Pocock" url="https://github.com/mattpocock/skills" autor="Matt Pocock" stars="98k">
+Várias skills são essencialmente receitas que dizem ao agente em qual ordem usar quais ferramentas pra cumprir uma tarefa. Olhar uma ou duas dá intuição rápida.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="Dictionary of AI Coding" url="https://github.com/mattpocock/dictionary-of-ai-coding" autor="Matt Pocock" stars="1.7k">
+Tem verbete pra "tool call", "permission", "context", "diff". Bom pra fixar vocabulário sem ler texto longo.
+</FonteGratis>

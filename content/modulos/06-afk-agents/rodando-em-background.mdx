@@ -1,0 +1,106 @@
+Background é diferente de sub-agente. Sub-agente trabalha e te devolve texto. Background é um **processo rodando** enquanto você faz outra coisa: um servidor de dev, um build, um teste demorado, um download grande.
+
+A pergunta certa não é "como rodo background", é "vale a pena rodar em background?". Spoiler: depende do tempo.
+
+## A regra dos 60 segundos
+
+Critério prático:
+
+- **Trabalho < 60s:** roda em foreground, espera. O custo de gerenciar processo em background não compensa.
+- **Trabalho >= 60s:** vai pra background. Você libera o agente pra fazer outra coisa enquanto isso roda.
+
+Por quê 60s? Porque abaixo disso, o overhead mental de "lembrar que tem coisa rodando" custa mais do que o tempo que você economiza.
+
+<AnalogiaObra titulo="Forno de cura vs prego na parede">
+Pensa em curar um corpo de prova de concreto. Você prepara, coloca na câmara úmida, e vai embora por 28 dias. Faz sentido ficar lá olhando? Não. Background absoluto.
+
+Agora pensa em pregar uma tabela na parede. Você não vai "deixar a furadeira em background" enquanto faz outra coisa. Você fura, prende, acabou. Foreground.
+
+Critério: se o trabalho **se sustenta sozinho** depois de iniciado e você só precisa **conferir depois**, é background. Se exige sua mão até o fim, é foreground.
+</AnalogiaObra>
+
+## O que o Claude Code faz em background
+
+Quando você manda o agente rodar algo em background, a ferramenta Bash aceita um parâmetro tipo `run_in_background: true`. O comando vai pro segundo plano, o agente recebe um identificador, e segue fazendo outra coisa.
+
+Casos típicos:
+
+- **Servidor de dev (`npm run dev`).** Sobe e fica no ar. Você quer continuar trabalhando enquanto ele serve a página.
+- **Build longo (`npm run build` em monorepo).** 3-8 minutos. Não dá pra ficar olhando.
+- **Suite de teste grande.** Mesmo tempo, mesma lógica.
+- **Treinamento/embedding/processamento de dataset.** Horas.
+
+<Callout tipo="info" titulo="Você vai receber notificação quando terminar">
+Em vez de ficar perguntando "já acabou? já acabou?", o agente recebe um aviso quando o background process completa. Aí ele lê o output e decide o próximo passo.
+</Callout>
+
+## O risco de gastar token à toa
+
+Aqui tem uma armadilha real: se você ficar **pollando** o status do background ("já terminou? já terminou? já terminou?"), cada checagem custa contexto e dinheiro. Token gasto sem entregar valor.
+
+A regra é: **dispara e esquece até receber notificação**. Não fique inventando motivo pra checar antes da hora.
+
+<Callout tipo="armadilha" titulo="Sleep em loop é o pior dos mundos">
+Já vi gente mandar o agente "espera 10s, checa, se não terminou espera mais 10s, checa de novo". Em vez de ficar livre pra outra tarefa, o agente fica gastando turnos em loop esperando. Custa caro e não acelera nada. Manda em background de verdade e siga a vida.
+</Callout>
+
+## Hook de notificação
+
+Hook é um pedaço de configuração que o **harness do Claude Code** executa quando algo acontece. Não é o Claude fazendo, é a ferramenta. Isso importa porque você pode automatizar "me avisa quando terminar" sem depender do agente lembrar de checar.
+
+Hooks comuns pra background:
+
+- **Stop hook:** quando um background process termina, dispara uma notificação no sistema (toast no Windows, som no Mac).
+- **Notification hook:** envia mensagem no Telegram, Slack, email quando uma condição bate.
+
+O Lucas pode configurar isso em `settings.json`. Pra essa lição, a ideia é só você saber que existe. Se precisar mexer, peça pro Claude Code com a skill `update-config`.
+
+## Quando NÃO usar background
+
+- **Comando que precisa de input interativo.** `git rebase -i`, prompts de senha. Background não te deixa responder.
+- **Comando curto.** `ls`, `git status`, `npm install` de pacote único. Rápido demais pra justificar.
+- **Quando você precisa do output **imediatamente** pra próximo passo.** Aí é foreground mesmo, sem fugir.
+
+## Combinando background + sub-agente
+
+Padrão de produtividade real:
+
+1. Lança um **build em background** (vai durar 5 minutos).
+2. Lança 2 **sub-agentes em paralelo** pra investigar dois bugs enquanto o build roda.
+3. Quando os sub-agentes voltam (2 min), você já tem informação pra trabalhar.
+4. Quando o build termina (mais 3 min), você lê o resultado e decide se commit ou rola fix.
+
+Em 5 minutos você fez o trabalho que em sequência levaria 15.
+
+<ExercicioPratico numero={1} titulo="Mede teu tempo morto" tempo="15min">
+Numa próxima sessão, anota num post-it (de verdade, no papel) toda vez que você ficou **esperando** algo rodar (build, teste, deploy, download). Anota o tempo de cada espera.
+
+No fim do dia, soma. Provavelmente vai dar entre 20 e 60 minutos. Se você jogasse 80% dessas esperas em background e usasse o tempo pra outra coisa, ganharia meia hora por dia.
+
+Em uma semana, isso é uma tarde inteira recuperada.
+</ExercicioPratico>
+
+## Verificar saída sem poluir contexto
+
+Quando o background termina, **leia o output uma vez** e descarte. Não fica reanalisando log de build de 200 linhas no contexto principal. Se precisa investigar erro específico, lance um sub-agente pra ler o log e te resumir.
+
+<Callout tipo="dica" titulo="Resumo de log via sub-agente">
+"Lê `tmp/build.log` (1200 linhas), me reporta em até 150 palavras: número de erros, primeiro erro com arquivo:linha, hipótese de causa." Limpa, focado, sem entupir teu contexto principal.
+</Callout>
+
+<Checkpoint>
+- Background quando trabalho >= 60s e roda sozinho.
+- Foreground quando curto ou precisa input.
+- Não fique pollando, espere notificação.
+- Hook de notificação automatiza aviso quando termina.
+- Padrão poderoso: background + sub-agentes em paralelo.
+- Log gigante? Resuma via sub-agente, não no contexto principal.
+</Checkpoint>
+
+<FonteGratis tipo="doc" titulo="Claude Code hooks" url="https://docs.claude.com/en/docs/claude-code/sub-agents" autor="Anthropic">
+Documentação do Claude Code cobre sub-agentes e o sistema de hooks de configuração.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="dictionary-of-ai-coding" url="https://github.com/mattpocock/dictionary-of-ai-coding" autor="Matt Pocock" stars="1.7k">
+Dicionário do Matt define termos como "background process", "hook" e "AFK agent" no contexto de AI coding.
+</FonteGratis>

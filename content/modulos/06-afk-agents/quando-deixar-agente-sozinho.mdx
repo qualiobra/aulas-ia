@@ -1,0 +1,96 @@
+AFK significa "Away From Keyboard". Você manda o agente trabalhar, levanta da cadeira, vai tomar um café, volta meia hora depois e olha o que ele fez. Parece sonho, mas só funciona se você souber **quando** soltar a rédea e quando segurar firme.
+
+Essa lição é sobre o critério de decisão. Não tem regra mágica do Matt Pocock pra isso. Tem perguntas que você faz antes de apertar enter e ir embora.
+
+## As três perguntas antes de sair da sala
+
+Antes de deixar um agente sozinho, responde isso:
+
+1. **O escopo está claro?** Você consegue descrever em uma frase o que é "pronto"? Se não consegue, o agente também não vai conseguir.
+2. **As ferramentas que ele vai usar são seguras?** Ele só vai ler arquivos e rodar testes, ou ele pode apagar coisa e mandar pra produção?
+3. **Existe critério de verificação automática?** Um teste, um build, um lint. Algo que **a máquina** consegue checar sem você olhando.
+
+Se as três respostas forem sim, libera. Se uma for não, fica perto.
+
+<AnalogiaObra titulo="Equipe noturna vs serviço crítico">
+Pensa na obra. Tem serviço que você deixa a equipe noturna fazer: aplicar revestimento numa parede que já foi medida, marcada e aprovada. O escopo está claro (essa parede, esse material), a ferramenta é segura (desempenadeira não derruba prédio) e dá pra verificar de manhã (parede coberta, sem bolha, no esquadro).
+
+Agora pensa numa concretagem de laje. Você não deixa pra noturna sem mestre de obra acompanhando. Por quê? Escopo é dinâmico (vibrador precisa de ajuste, slump muda com chuva), a ferramenta é destrutiva (concreto curou errado, quebra tudo) e o critério de pronto só aparece depois que cura, tarde demais pra corrigir.
+
+Agente é igual. Refatorar componente isolado com teste passando? Equipe noturna. Mexer em migration de banco que vai pra produção? Mestre de obra do lado.
+</AnalogiaObra>
+
+## Quando NUNCA deixar sozinho
+
+Tem três zonas onde AFK é cilada. Decora:
+
+- **Mudança de schema de banco.** Migration, alter table, drop column. Se o agente errar, você perde dado. Não tem ctrl+z em produção.
+- **Push pra produção.** Deploy, merge em main protegida, publicação de pacote no npm. Ação irreversível ou cara de reverter.
+- **Mexer em segredo.** Rotacionar API key, editar `.env`, tocar em auth. Risco de vazar, risco de quebrar login pra todo mundo.
+
+<Callout tipo="armadilha" titulo="O 'só essa vez' é onde o estrago acontece">
+"Hoje eu deixo ele dar push porque eu tô atrasado." Não. A regra serve justamente pros dias em que você está cansado e com pressa. É nesses dias que você ia revisar mal de qualquer jeito.
+</Callout>
+
+## Quando SOLTA sem medo
+
+Do outro lado tem trabalho que é perfeito pra AFK:
+
+- **Refatorar código com teste cobrindo.** Se o teste passa antes e depois, tá ok. Critério verificável.
+- **Adicionar testes que faltam.** O pior que pode acontecer é teste ruim. Você revê.
+- **Escrever documentação a partir do código.** Output é texto, não muda comportamento.
+- **Investigar bug em ramo separado.** Ele explora, escreve relatório, você decide depois.
+- **Padronizar formatação, renomear variáveis, organizar imports.** Linter resolve metade. Agente acelera.
+
+## Critério de pronto verificável
+
+Esse é o pulo do gato. Se você quer ir AFK, precisa de algo que diga "terminou e tá certo" **sem você ler linha por linha**.
+
+Boas formas:
+
+- Teste automatizado passando (`npm test` retorna 0)
+- Build compilando (`npm run build` sem erro)
+- Lint zerado (`npm run lint`)
+- Relatório estruturado escrito num arquivo, que você lê depois
+
+Forma ruim: "ele me disse que terminou". Não confia na narrativa do agente sozinha. Quer prova.
+
+<ExercicioPratico numero={1} titulo="Classifica 5 tarefas suas" tempo="15min">
+Pega 5 coisas que você tá precisando fazer (pode ser na QualiBrokers, na QualiGestão, em qualquer projeto). Pra cada uma, responde:
+
+1. Escopo claro? (sim/não)
+2. Ferramentas seguras? (sim/não)
+3. Critério verificável? (sim/não)
+
+Depois marca cada uma como **AFK ok**, **acompanhar de perto** ou **NUNCA AFK**.
+
+Você vai descobrir que 60-70% do seu trabalho é AFK-friendly se você se der ao trabalho de definir o critério de pronto. A maioria das pessoas não tira o trabalho da cadeira porque não consegue articular o que é "pronto", não porque o trabalho é genuinamente complexo.
+</ExercicioPratico>
+
+<Callout tipo="importa" titulo="Autonomia ganha-se, não dá-se">
+Comece com tarefas pequenas, AFK por 5 minutos, volta, confere. Foi bem? Próxima vez deixa 15. Foi bem de novo? 30. Você está calibrando confiança igual capataz calibra confiança em pedreiro novo. Não jogue na hora do almoço de cara.
+</Callout>
+
+## Plano B sempre montado
+
+Antes de sair, garante:
+
+- **Branch separada.** Nunca AFK em `main`. Sempre `feat/algo` ou `experimento/x`.
+- **Commit antes de soltar.** Se o agente bagunçar, `git reset` te salva.
+- **Limite de tempo.** "Tenta por 30 minutos. Se não conseguiu, para e me chama."
+
+<Checkpoint>
+- AFK não é "sem humano". É "humano revisa depois", não "humano nem revisa".
+- Três perguntas: escopo claro? ferramenta segura? critério verificável?
+- Nunca AFK em: schema, produção, segredo.
+- Sempre branch separada, commit antes, limite de tempo.
+- Autonomia se constrói incremental, igual confiança em pedreiro novo.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="mattpocock/sandcastle" url="https://github.com/mattpocock/sandcastle" autor="Matt Pocock" stars="4.7k">
+Estrutura de pastas pra organizar tarefas AFK (incoming/working/done). A gente vai detalhar isso na última lição do módulo.
+</FonteGratis>
+
+<FonteGratis tipo="doc" titulo="Claude Code Sub-agents" url="https://docs.claude.com/en/docs/claude-code/sub-agents" autor="Anthropic">
+Documentação oficial de sub-agentes. Leitura curta, vale o tempo antes da próxima lição.
+</FonteGratis>

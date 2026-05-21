@@ -1,0 +1,135 @@
+Chega de teoria. Essa lição é hands-on: você vai planejar uma feature de verdade, num projeto seed, vendo o ciclo completo. Plan mode liga, plano sai, você critica, plano melhora, você aprova, código sai. Sem pular etapa.
+
+A ideia não é a feature ficar perfeita. É você sentir o **ritmo** do ciclo, pra repetir ele em projetos reais depois.
+
+## A feature
+
+Você tem um projeto seed (vamos usar um Next.js simples com lista de tarefas em memória). A feature pedida:
+
+> **"Quero marcar tarefas como favoritas. Favoritas aparecem no topo da lista."**
+
+Curta. Aparentemente óbvia. Cheia de decisões escondidas. Perfeita pra exercitar o ciclo.
+
+## Setup do exercício
+
+Antes de começar, clona um seed simples (ou usa qualquer projeto Next.js seu com uma lista qualquer):
+
+```bash
+git clone https://github.com/mattpocock/sandcastle.git planning-demo
+cd planning-demo
+npm install
+claude
+```
+
+Se você tiver outro seed à mão, melhor ainda. O importante é ter um projeto onde "lista de tarefas" faça sentido (pode ser lista de clientes, lista de produtos, qualquer coisa).
+
+## Passo 1: Pedir entrando direto em plan mode
+
+No terminal do Claude Code, aperta `Shift+Tab` duas vezes. Aparece um indicador "plan mode" no rodapé. Agora digita:
+
+> "Quero adicionar a possibilidade de marcar itens dessa lista como favoritos. Favoritos devem aparecer no topo. Faz um plano detalhado antes de qualquer mudança no código."
+
+Manda. Espera ele explorar.
+
+<Callout tipo="dica" titulo="Em plan mode ele vai ler bastante">
+Não estranha se ele abrir 10, 15 arquivos. É o trabalho dele em plan mode: entender o terreno antes de propor. Quanto mais ele lê, melhor o plano sai. Não corta a sessão no meio achando que ele tá perdido.
+</Callout>
+
+## Passo 2: Ler o plano com olho crítico
+
+Provavelmente o primeiro plano vai vir mais ou menos assim (varia, mas o esqueleto é parecido):
+
+> **Objetivo**: permitir marcar tarefas como favoritas e exibir favoritas no topo.
+>
+> **Passos**:
+> 1. Adicionar campo `favorita: boolean` no tipo `Tarefa`.
+> 2. Adicionar botão de estrela no card de tarefa.
+> 3. Ordenar lista por `favorita` desc, depois por `criadaEm`.
+> 4. Persistir estado.
+
+Lê devagar. Vai sentir o cheiro de coisa faltando. Anota mentalmente:
+
+- "Persistir estado" como? localStorage? estado em memória? banco? Ele não disse.
+- "Botão de estrela" onde no card? Canto superior direito? Junto do título?
+- Toggle ou só marcar? Posso desfavoritar?
+- A ordenação quebra alguma ordenação atual existente?
+- Tem teste? Vai escrever?
+
+Essas são as **lacunas**. Plano bom não tem lacuna grande sem aviso.
+
+## Passo 3: Devolver crítica específica
+
+Não fala "tá vago" e deixa ele adivinhar. Aponta linha por linha. Algo assim:
+
+> "Plano tá no caminho, mas tem lacunas:
+>
+> 1. Passo 4 (persistir) tá vago. Hoje a lista é em memória, sem backend. Persiste em localStorage por enquanto, com chave `tarefas-favoritas`.
+> 2. Botão de estrela: canto superior direito do card, ícone de estrela vazia/cheia. Clique alterna.
+> 3. Confirma: se eu desfavoritar uma tarefa, ela volta pra ordem original (por data)?
+> 4. Quero teste cobrindo: marcar, desmarcar, ordem com 3 itens (2 favoritos, 1 não).
+> 5. Lista os arquivos afetados.
+>
+> Refaz o plano com essas decisões."
+
+Manda. Ele vai voltar com plano melhor.
+
+## Passo 4: Aprovar (de verdade)
+
+Quando o plano voltar com lacunas tampadas e arquivos listados, você lê de novo. Se estiver ok, responde:
+
+> "Aprovado. Executa."
+
+Ele sai do plan mode e começa a editar. **Não saia da sala**. Acompanha o que ele tá fazendo. Cada arquivo que ele toca, você vê.
+
+<AnalogiaObra titulo="Aprovar o projeto antes da concretagem">
+Você não assina o memorial descritivo da obra sem ler. E não sai do canteiro no dia da concretagem. Mesmo princípio aqui. Aprovar é ato consciente, não automático. E executar é hora de presença, não de ir tomar café.
+</AnalogiaObra>
+
+## Passo 5: Revisar o diff antes de fechar
+
+Quando ele terminar, ele vai te mostrar o resumo. **Antes** de aceitar como pronto:
+
+1. Roda os testes que ele criou (`npm test`).
+2. Abre a app, testa o fluxo do critério de aceite.
+3. Confere se ele tocou só nos arquivos listados no plano. Se tocou em arquivo que não tava no plano, pergunta o porquê.
+
+Se algo não bate com o critério de aceite, ele volta a trabalhar. Esse é o último ponto de fricção barato antes do commit. Use ele.
+
+<ExercicioPratico numero={1} titulo="Ciclo completo numa feature sua" tempo="30min">
+Roda o ciclo dos 5 passos acima usando a feature dos favoritos. Critérios pra dizer que terminou:
+
+- Você usou plan mode explicitamente (`Shift+Tab` 2x).
+- Você devolveu pelo menos uma crítica específica (não "tá vago", e sim "passo X falta Y").
+- O plano final tem critério de aceite e arquivos listados.
+- Você só falou "executa" depois de ler o plano inteiro.
+- Você abriu a app e testou o fluxo antes de aceitar como pronto.
+
+Se algum dos 5 não rolou, repete o ciclo com uma feature menor (ex: "filtrar por categoria") até virar reflexo.
+</ExercicioPratico>
+
+<Callout tipo="armadilha" titulo="A tentação de aprovar rápido">
+Vai dar vontade de ler o plano nas diagonais e mandar "ok executa". Resiste. Os 90 segundos extras lendo o plano valem 30 minutos depois evitando debug. Se você se pegar lendo rápido demais, fala em voz alta cada passo. Voz alta força leitura real.
+</Callout>
+
+<Callout tipo="proximaParada" titulo="Pro próximo módulo">
+Você acabou de fazer plan mode manual. Esse fluxo cabe numa **skill** (lembra do módulo 3?), pra que toda task de tamanho médio passe por plano automaticamente sem você ter que lembrar de `Shift+Tab` toda vez. No próximo módulo a gente entra em **loops de feedback**: como fechar o ciclo entre escrever, testar e corrigir sem virar refém de erro silencioso.
+</Callout>
+
+<Checkpoint>
+- Você fez o ciclo: plan mode liga → plano sai → crítica específica → plano melhora → aprovação consciente → execução → revisão do diff.
+- Você sentiu que crítica específica produz plano melhor que crítica genérica.
+- Você não saiu de perto enquanto o agente executava.
+- Você revisou o diff antes de fechar a task.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="sandcastle (seed Next.js)" url="https://github.com/mattpocock/sandcastle" autor="Matt Pocock" stars="4.7k">
+Seed que o Matt usa pra exercitar o ciclo. Ótimo pra praticar plan mode sem medo de quebrar projeto real.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="ai-hero" url="https://github.com/ai-hero-dev/ai-hero" autor="Matt Pocock">
+Repo do curso. Tem exemplos de PRs onde o ciclo plan→exec→review foi gravado, dá pra estudar o ritmo de fora.
+</FonteGratis>
+
+<FonteGratis tipo="doc" titulo="Claude Code (referência de plan mode)" url="https://docs.claude.com/en/docs/claude-code" autor="Anthropic">
+Doc oficial pra checar atalhos e comportamento do plan mode quando algo te surpreender no ciclo.
+</FonteGratis>

@@ -1,0 +1,86 @@
+Tem uma pergunta que separa quem usa IA bem de quem se ferra: **onde, exatamente, eu preciso estar olhando?** Porque "estar no loop" o tempo todo é não-ter-ferramenta. E "soltar a rédea total" é igualmente burrice, só que num outro sabor. O meio termo não é instinto, é heurística.
+
+Esse módulo é sobre essa heurística. Hoje, especificamente: como decidir em quais pontos do trabalho do agente você **precisa** estar presente, e em quais pontos você só atrapalha.
+
+## A regra de três (raio de explosão, reversibilidade, exposição)
+
+Pra cada decisão que o agente tá prestes a tomar, faz três perguntas mentais. Bem rápido, 5 segundos:
+
+1. **Raio de explosão (blast radius):** se isso der errado, o que mais quebra junto? Um arquivo? Um módulo? O sistema inteiro? Um cliente real?
+2. **Reversibilidade:** dá pra desfazer com `git revert`? Ou já foi pro banco de produção, pro Stripe, pro e-mail do cliente?
+3. **Exposição:** isso vai parar na frente de outra pessoa? Cliente, fornecedor, fiscal, internet pública?
+
+Se as três respostas forem "pequeno, reversível, interno", deixa rodar. Se **uma** delas pesar, você precisa estar lá antes do agente apertar o botão.
+
+## A lista enxuta de pontos críticos
+
+Não tente decorar 200 casos. Decora esses cinco padrões. Quando o agente chegar perto de qualquer um, **pausa obrigatória**:
+
+- **Operações de banco que não dá pra reverter:** `DROP TABLE`, `DELETE` sem `WHERE`, migrations que alteram schema em produção, mudanças em índices que travam tabela grande.
+- **Comunicação saindo pra fora:** mandar e-mail, mandar mensagem no Telegram/WhatsApp, criar issue/PR em repo público, fazer commit numa branch protegida, post em rede social.
+- **Dinheiro:** qualquer chamada pra Stripe, gateway de pagamento, criação/edição de fatura, mudança de preço, emissão de boleto.
+- **Credenciais e segurança:** trocar variáveis de ambiente, mexer em política RLS do Supabase, mudar permissão de bucket, gerar/revogar token de API.
+- **Coisa que vai pro cliente final:** texto público no site, e-mail transacional, mensagem automatizada, contrato, proposta.
+
+Tudo fora dessa lista, na média, dá pra deixar rolar e revisar depois. Tudo dentro, **checkpoint obrigatório**.
+
+<AnalogiaObra titulo="ART, concretagem e entrega de chave">
+Pensa numa obra. Tem 800 micro-decisões por dia (qual marca de cimento o servente pega, em que ordem assenta o bloco, onde guarda a betoneira de noite). Você não acompanha nenhuma. Confia no mestre.
+
+Mas tem três momentos que **você assina presencialmente**, sem exceção:
+
+1. **Assinatura da ART/RRT.** É seu CPF no projeto. Se der ruim, o CREA te procura, não o mestre.
+2. **Concretagem da fundação ou laje.** Errou o traço, esqueceu o vibrador, choveu na hora errada, virou crônico. Não tem `git revert` em concreto curado. Reversibilidade zero, blast radius enorme.
+3. **Entrega de chave pro cliente.** É a hora que o trabalho vira público. Se entregar com rachadura aparente, manchou a marca por anos.
+
+A IA tem os mesmos três tipos de ponto. ART = qualquer coisa que sai com seu nome (e-mail enviado, post publicado, contrato emitido). Concretagem = qualquer coisa irreversível (DROP, DELETE, push pra main, charge no cartão). Entrega = qualquer coisa que vira público (deploy, mensagem ao cliente, PR em repo aberto).
+
+O resto, deixa o mestre tocar.
+</AnalogiaObra>
+
+## O erro comum: estar presente nos lugares errados
+
+Lucas, presta atenção nesse aqui porque é o teu padrão TDAH conversando contigo: tem uma tentação de ficar olhando o agente **codar**. Cada arquivo que ele abre, cada função que ele escreve. Isso é controle ansioso, não checkpoint útil. Você lê o diff de 200 linhas no meio do trabalho dele e quebra o flow dele e o seu, sem ganho de segurança porque ainda não rodou nada.
+
+A regra inversa funciona melhor: **deixa ele terminar uma unidade de trabalho inteira**, aí você revisa o diff agregado. Você só interrompe se ele chegar num dos pontos da lista acima.
+
+<Callout tipo="armadilha" titulo="Falso checkpoint">
+"Posso prosseguir?" no meio de uma task simples não é checkpoint, é ruído. Se você responde "sim" toda vez no automático, o checkpoint perdeu valor. Quando o agente perguntar e você sentir que tá só rubricando, é porque a pergunta tava no lugar errado. Próxima sessão, ajusta o CLAUDE.md pra ele não perguntar nesse caso.
+</Callout>
+
+## Como sinalizar isso pro agente
+
+Você não precisa ficar guardião de lista mental. Coloca no `CLAUDE.md` do projeto:
+
+```
+## Pontos onde você PARA e me pergunta antes
+- Qualquer comando SQL com DROP, DELETE sem WHERE, ALTER TABLE em produção
+- Qualquer chamada de API que envia mensagem (Telegram, e-mail, WhatsApp)
+- Qualquer push pra branch main ou criação de PR
+- Mudança em variável de ambiente ou secret
+- Qualquer charge/cobrança via Stripe
+```
+
+Ele vai respeitar. Não é perfeito, às vezes escapa, mas a taxa de acerto sobe demais.
+
+<ExercicioPratico numero={1} titulo="Mapeia teus 5 pontos críticos" tempo="15min">
+Pega um projeto teu (qualiobra, qualibrokers, qualquer um). Lista **5 ações** que, se a IA fizesse sem te perguntar, te deixariam acordado de madrugada. Seja específico: não vale "mexer no banco", vale "rodar `DELETE FROM contatos WHERE...` na tabela de produção da Vanessa".
+
+Depois adiciona essas 5 linhas no `CLAUDE.md` do projeto, na seção "Pontos onde você PARA". Próxima sessão, observa se o agente respeitou.
+</ExercicioPratico>
+
+<Checkpoint>
+Você sai dessa lição entendendo que **estar presente é seletivo**. Os pontos de presença obrigatória são onde o blast radius é grande, a reversibilidade é zero, ou a exposição é pública. O resto, confia no agente e revisa o agregado depois.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="dictionary-of-ai-coding" url="https://github.com/mattpocock/dictionary-of-ai-coding" autor="Matt Pocock" stars="1.7k">
+Glossário curto do Matt com termos como "blast radius" e "human-in-the-loop". Vale 5 minutos de leitura pra fixar o vocabulário antes de seguir pras próximas lições.
+</FonteGratis>
+
+<FonteGratis tipo="doc" titulo="Claude Code Documentation" url="https://docs.claude.com/en/docs/claude-code" autor="Anthropic">
+Doc oficial. Procura a seção de permissões e modos de aprovação. É a base técnica pra implementar checkpoints (próxima lição).
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="mattpocock/skills" url="https://github.com/mattpocock/skills" autor="Matt Pocock" stars="98k">
+Coleção de skills do Matt. Procura as que tratam de revisão e aprovação manual pra pegar referência de como ele desenha checkpoints na prática.
+</FonteGratis>

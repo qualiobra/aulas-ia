@@ -1,0 +1,71 @@
+Cabou. Você atravessou os oito módulos do curso. Vamos olhar pra trás antes de olhar pra frente, porque essa é uma das coisas que o TDAH faz pior: ele te empurra pro próximo brilho e você esquece o que aprendeu. Então paramos um minuto aqui.
+
+## O que você atravessou
+
+Em uma frase cada:
+
+- **Módulo 0 (Setup):** instalou Claude Code, fez teu primeiro prompt, entendeu o básico de git pra não perder trabalho.
+- **Módulo 1 (Conhecendo o Claude Code):** sacou a diferença entre chatbot e agente, e quais ferramentas o agente usa pra mexer no teu sistema.
+- **Módulo 2 (Fundamentos):** aprendeu a anatomia de um pedido bom, como dar contexto sem poluir, e o ciclo planeja-faz-revisa.
+- **Módulo 3 (Steering):** transformou o `CLAUDE.md` na tua "instrução viva" e descobriu quando criar skill vale o custo.
+- **Módulo 4 (Planning):** entendeu por que errar no plano custa 20x menos que errar no código, e como usar o plan mode pra isso.
+- **Módulo 5 (Feedback loops):** aprendeu a montar loops curtos (build, test, lint) que dão sinal pro agente sem você ter que ficar olhando.
+- **Módulo 6 (Sub-agentes):** descobriu como delegar pesquisa e análise pra agentes paralelos sem queimar teu contexto principal.
+- **Módulo 7 (Humano no loop):** agora, finalizou com onde estar presente, como fazer checkpoint útil, e como o agente escala com elegância quando se perde.
+
+Esse é o esqueleto inteiro. Se você tirou só isso, já tá em outro patamar.
+
+## As 5 práticas pra cultivar agora
+
+Não tente aplicar tudo de uma vez. Pega **uma** prática por semana e enraíza. Em 5 semanas, vira reflexo.
+
+1. **`CLAUDE.md` versionado e vivo.** Toda vez que você se pegar repetindo uma instrução pro Claude na mesma sessão, abre o `CLAUDE.md` e escreve lá. Versão no git. Em 2 meses, você não vai mais "ensinar" o Claude no início de cada sessão, ele já vai chegar ensinado.
+
+2. **Planejamento explícito antes de tarefa de 2+ arquivos.** Plan mode. Sem exceção. Se a task toca dois arquivos ou tem ambiguidade, plano antes. Doze segundos lendo o plano economizam 40 minutos de refator.
+
+3. **Feedback loop em menos de 30 segundos.** Cada projeto teu deve ter um comando que roda em até 30s e te diz se o código tá vivo (`npm test --watch`, `npm run build`, `tsc --noEmit`, o que for). Se demora mais que isso, ajuste pra rodar só o que importa. Agente sem loop curto é agente cego.
+
+4. **Sub-agentes pra tudo que for pesquisa/leitura/análise pesada.** Tua memória global já diz isso: delegar é tua obrigação, executar não. Toda vez que sentir vontade de pedir pro agente principal "lê esses 30 arquivos e me resume", para. Lança sub-agente. Teu contexto principal fica limpo, a resposta vem melhor.
+
+5. **Checkpoint só nos pontos críticos.** Aplica a regra de três (blast radius, reversibilidade, exposição) e instala no `CLAUDE.md` os 5 pontos onde o agente **para e pergunta**. Resto, deixa rolar. Você ganha velocidade sem perder segurança.
+
+<AnalogiaObra titulo="Engenheiro que já tem cinco obras">
+No início, você acompanhava cada concretagem pessoalmente, lia cada nota fiscal, conferia cada projeto linha por linha. Era exaustivo, mas você tava aprendendo.
+
+Hoje, com cinco obras tocando ao mesmo tempo, você tem **sistema**: cronograma que dispara alerta, mestre que sabe quando te ligar, dia fixo da semana pra visita, formulário padrão de RDO. Você não tá menos presente, tá **presente nos lugares certos**.
+
+Trabalhar com IA é o mesmo movimento. As 5 práticas acima são teus sistemas: CLAUDE.md = procedimento operacional, plan mode = projeto-executivo, feedback loop = fiscal de obra, sub-agentes = encarregados de frente, checkpoints = pontos de assinatura. Você sai de "operário com IA" pra "engenheiro com IA". Tem diferença.
+</AnalogiaObra>
+
+## Como continuar aprendendo (sem virar refém de curso novo toda semana)
+
+O caminho mais honesto é simples e meio chato:
+
+- **Usa todo dia.** Não pra projeto grande, pode ser qualquer coisa. Renomeia uma variável, escreve um README, conserta um typo. O músculo precisa de repetição.
+- **Anota o que deu errado.** Em `memory/learnings/` (no padrão que você já tem). Sessão que gerou aprendizado e não foi registrada é sessão perdida. Tua regra de ouro do CLAUDE.md desse workspace.
+- **Lê o que o Matt Pocock publica.** O cara é honesto, técnico, não vende fumaça. Os repos `skills`, `sandcastle` e `dictionary-of-ai-coding` são atualizados; segue ele no GitHub e olha quando atualizar.
+- **Acompanha a doc oficial do Claude Code.** Recurso novo aparece toda semana. Em vez de seguir 12 influencer, lê a doc oficial uma vez por mês. Fica calibrado.
+
+<Callout tipo="importa" titulo="O perigo do curso seguinte">
+Vai aparecer "AI Coding 2.0", "Próximo Nível", "Curso Definitivo". A maioria é repetição com capa nova. Antes de comprar, pergunta: **eu já apliquei as 5 práticas que aprendi?** Se a resposta é "não", o problema não é falta de curso, é falta de prática. Volta pro `CLAUDE.md`.
+</Callout>
+
+## Última coisa
+
+Tem uma frase do Matt que vale guardar: "**The hard part isn't making the AI write code. It's deciding what to build, and noticing when it's wrong.**". O curso inteiro foi sobre essas duas coisas. O resto é commodity.
+
+Você é engenheiro civil. Você já tem o reflexo de "noticing when it's wrong" calibrado pra concreto, ferragem, prumo, esquadro. Agora você tá calibrando o mesmo reflexo pra código gerado. É a mesma habilidade, em outro material.
+
+Boa obra.
+
+<Checkpoint>
+Você termina o curso com 7 módulos digeridos, 5 práticas pra cultivar, e uma postura: presente nos pontos críticos, ausente no resto, sempre revisando depois. O resto é tempo + repetição.
+</Checkpoint>
+
+<FonteGratis tipo="doc" titulo="Claude Code Documentation" url="https://docs.claude.com/en/docs/claude-code" autor="Anthropic">
+Doc oficial. Mantém atualizado os recursos novos (sub-agents, hooks, skills, plan mode). Lê uma vez por mês, vinte minutos. Vale mais que qualquer curso novo.
+</FonteGratis>
+
+<FonteGratis tipo="post" titulo="AI Hero" url="https://www.aihero.dev" autor="Matt Pocock">
+Site do Matt com posts técnicos curtos e honestos sobre AI coding. Não é vitrine de produto, é conteúdo real. Coloca no RSS.
+</FonteGratis>

@@ -1,0 +1,171 @@
+## Três passos, sempre nessa ordem
+
+Quem usa agente bem trabalha em loop, não em jato. O loop é simples:
+
+1. **Planeja**: descreve o que vai fazer, em texto, antes de tocar em código.
+2. **Faz**: implementa o plano.
+3. **Revisa**: lê o diff, roda, confere critério de pronto.
+
+Parece óbvio. Mas a maioria pula direto pro passo 2 e fica refazendo. Tipo pedreiro que começa a levantar parede sem ver onde tá o esgoto.
+
+## Por que esse loop produz qualidade
+
+Cada passo **mata um tipo de erro diferente**:
+
+- O **planeja** mata erro de direção. ("Eu ia fazer X mas o jeito certo é Y.")
+- O **faz** mata erro de execução. ("Esqueci o tratamento de erro aqui.")
+- O **revisa** mata erro de regressão. ("Funcionou, mas quebrou outra coisa.")
+
+Pular o planeja é confiar que você sabia exatamente o que ia sair antes de começar. Pular o revisa é confiar que o agente nunca erra. Ambas as premissas são falsas.
+
+<AnalogiaObra titulo="Projeto, execução, vistoria">
+  Na obra, ninguém constrói sem projeto. Mesmo um muro pequeno tem projeto: croqui no
+  caderno, cota, posição. Depois vem a execução. E depois vem a vistoria: você anda no
+  pavimento, confere prumo, alinhamento, acabamento.
+
+  Se você corta o projeto, levanta torto. Se corta a vistoria, entrega defeito. Os 3 passos
+  existem porque cada um pega coisa que os outros 2 não pegam.
+
+  Trabalhar com agente é igual. Planeja é projeto. Faz é execução. Revisa é vistoria.
+</AnalogiaObra>
+
+## O passo "planeja" feito direito
+
+Plano não é parágrafo poético. Plano é **lista de passos com decisão**. Bom plano tem:
+
+1. **Arquivos que vão ser tocados** (com nome).
+2. **Mudança em cada arquivo** (1 frase).
+3. **Ordem dos passos** (o que depende do quê).
+4. **O que vai testar pra confirmar** (critério de pronto, lembra?).
+5. **Riscos conhecidos** ou pontos de incerteza.
+
+Forma de pedir pro Claude Code:
+
+```
+Antes de implementar, me passa o plano em formato:
+- arquivos que você vai mexer
+- o que muda em cada um, em 1 frase
+- ordem dos passos
+- como vamos confirmar que tá certo
+- onde você ainda tem dúvida
+
+Não escreve código ainda. Espera eu aprovar o plano.
+```
+
+Esse último parágrafo é o que separa loop disciplinado de "o agente já saiu fazendo".
+
+<Callout tipo="dica" titulo="Plano em texto cabe na cabeça">
+  Se o plano é muito longo pra você ler de uma vez sem perder o fio, ele já é grande demais
+  pra ser uma task só. Quebra em duas. Plano que cabe em 8-10 bullets é plano executável.
+</Callout>
+
+## Como reconhecer um plano vago
+
+Plano vago é o mais traiçoeiro porque parece plano. Sinais:
+
+- **Verbos genéricos**: "atualizar a lógica", "melhorar a função", "ajustar o componente". O que **especificamente** vai mudar?
+- **Sem nome de arquivo**: se o plano não cita arquivos, ele não pensou onde mexer.
+- **Sem critério de pronto**: "ficar funcionando bem" não é critério.
+- **Pulou risco**: nenhum agente que pensou de verdade no problema acha que **não tem risco**. Se ele diz "tranquilo, sem risco", desconfia.
+
+Quando o plano vier vago, devolve. Não aprova achando que vai melhorar quando ele começar. Não vai. Plano ruim vira execução ruim.
+
+```
+Esse plano tá genérico. Detalha:
+- quais arquivos exatamente
+- o que muda em cada um
+- e me diz onde você ainda tá com dúvida do meu lado
+```
+
+## Quando dá pra pular o planeja
+
+Pular o planeja é OK quando:
+
+- **Mudança óbvia, sem opção**: trocar um literal de string, renomear variável local, fix de typo. O caminho é único.
+- **Já fez igual 10 vezes**: tarefa repetitiva conhecida, tipo "adiciona log no início da função".
+- **Modo "scratchpad"**: você tá brincando, prototipando, descartável. Aqui velocidade > qualidade.
+
+Regra prática: se você consegue prever em 1 frase o que o diff vai ser, dá pra pular o plano. Se não consegue, **não pula**.
+
+## Quando NUNCA pular o planeja
+
+- Tudo que mexe em **autenticação, permissão, segurança**.
+- Tudo que toca **banco de dados** (schema, migração, query que escreve).
+- Tudo que muda **comportamento de pagamento, cobrança, financeiro**.
+- Tudo que mexe em **arquivo compartilhado** (config global, utilitário usado em todo lugar).
+- Qualquer task que **outras pessoas** vão tocar depois (PR pra time, código pra cliente).
+
+Risco alto = plano obrigatório. Não tem exceção.
+
+<Callout tipo="importa" titulo="Plano protege você do agente confiante">
+  O agente vai sempre soar confiante. Mesmo quando tá errado. O plano é onde a confiança dele
+  encontra o seu cérebro: você lê, identifica o que tá estranho, e questiona ANTES de existir
+  código pra desfazer.
+</Callout>
+
+## O revisa não é só ler diff
+
+Revisar é:
+
+1. **Ler o diff** com o checklist da lição anterior.
+2. **Rodar** o código (build, teste, abrir no navegador).
+3. **Conferir o critério de pronto** que você definiu lá no pedido.
+4. **Cutucar um caso de borda** que o agente provavelmente esqueceu (entrada vazia, número zero, usuário não logado).
+
+Se algum desses 4 falha, **volta pro loop**. Não corrige você mesmo no script. Fala pro agente o que tá errado e ele refaz. Isso preserva a disciplina e te dá um padrão consistente.
+
+<ExercicioPratico numero={1} titulo="Roda o loop 1 vez, do começo ao fim" tempo="15min">
+Pega uma task pequena num projeto teu (ou inventa: "adicionar campo de telefone no cadastro
+de cliente" em um app fictício).
+
+1. Pede o **plano** primeiro. Não deixa implementar.
+2. Lê o plano. Critica. Pede ajuste se vago.
+3. Aprova e deixa **fazer**.
+4. Lê o diff com o checklist da lição anterior.
+5. Roda. Confere critério de pronto.
+
+Anota: onde o loop te salvou? Onde foi excesso? Você vai começar a calibrar quando vale e
+quando não vale.
+</ExercicioPratico>
+
+<Checkpoint>
+Você terminou esta lição quando:
+
+1. Explica os 3 passos do loop e o tipo de erro que cada um mata.
+2. Sabe pedir "plano antes de implementar" sem hesitar.
+3. Identifica um plano vago em menos de 30 segundos e sabe como devolver pro agente.
+4. Conhece sua própria lista de "task que NUNCA pula o planeja" (escreve, deixa colado).
+</Checkpoint>
+
+## Fontes grátis pra esta lição
+
+<FonteGratis
+  tipo="repo"
+  titulo="mattpocock/skills"
+  url="https://github.com/mattpocock/skills"
+  autor="Matt Pocock"
+  stars="98k"
+>
+  Várias skills do Matt seguem esse padrão de "plan first, execute later". Lê 2 ou 3 e repara
+  na estrutura.
+</FonteGratis>
+
+<FonteGratis
+  tipo="repo"
+  titulo="mattpocock/evalite"
+  url="https://github.com/mattpocock/evalite"
+  autor="Matt Pocock"
+>
+  Ferramenta de evals do Matt. O próprio README é um exemplo de como ele estrutura plano e
+  execução. Lê o README, ignora o resto por enquanto.
+</FonteGratis>
+
+<FonteGratis
+  tipo="doc"
+  titulo="Claude Code: best practices"
+  url="https://docs.claude.com/en/docs/claude-code"
+  autor="Anthropic"
+>
+  Procura a seção sobre planos e modo "ask first". Esse padrão tá embutido nas best practices
+  oficiais da Anthropic.
+</FonteGratis>

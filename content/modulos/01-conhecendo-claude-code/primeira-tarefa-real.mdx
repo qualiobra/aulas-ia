@@ -1,0 +1,112 @@
+Chega de teoria. Agora você vai ver o agente trabalhar de verdade, num projeto que já existe, fazendo uma mudança pequena mas real. O objetivo aqui não é entender cada linha do código que ele vai mexer. É ver o ciclo completo: você fala o que quer, ele planeja, propõe a edição, mostra o diff, você aprova, ele executa, te dá o resultado. Esse ciclo é o coração do trabalho diário.
+
+## A pasta de teste
+
+Cria uma pasta nova em qualquer canto (Desktop tá bom), chamada `teste-claude`. Dentro dela, cria um arquivo `saudacao.js` (pode ser pelo Bloco de Notas ou pelo próprio Claude) com este conteúdo:
+
+```js
+function saudar(nome) {
+  if (nome) {
+    return "Olá, " + nome + "!";
+  } else {
+    return "Olá, visitante!";
+  }
+}
+```
+
+É uma função simples que recebe um nome e devolve uma saudação. Funciona, mas está escrita de um jeito antiquado. Sua tarefa: pedir pro agente refatorar isso pra ficar mais limpo, e acompanhar o que ele faz.
+
+<Callout tipo="info" titulo="Refatorar significa o quê">
+Refatorar é mudar como o código está escrito sem mudar o que ele faz. A função continua recebendo um nome e devolvendo uma saudação. Mas a forma fica mais elegante, mais curta, mais fácil de ler. É como reorganizar uma planta baixa sem mudar a área construída.
+</Callout>
+
+## Passo 1: o pedido
+
+Você abre o Claude Code dentro da pasta do projeto e digita uma instrução em português. Não precisa de jargão técnico:
+
+> Refatora a função `saudar` no arquivo `saudacao.js` pra ficar mais moderna e curta, sem mudar o comportamento.
+
+Repare no que a frase tem. Tem o verbo claro (refatora), o alvo específico (a função `saudar`), o arquivo (`saudacao.js`) e a restrição (sem mudar comportamento). Isso é dirigir bem.
+
+## Passo 2: o plano
+
+O agente costuma responder primeiro com um plano em texto. Algo como:
+
+> Vou ler o arquivo `saudacao.js`, identificar a função `saudar`, propor uma versão usando arrow function e template literal, e te mostrar o diff antes de aplicar.
+
+Esse plano é seu primeiro ponto de revisão. Se você não entendeu o que ele propôs, pede explicação antes de continuar. "O que é arrow function?" "O que é template literal?" Ele explica em duas frases e segue.
+
+<AnalogiaObra titulo="O orçamento antes da reforma">
+Antes de qualquer obra séria, o engenheiro te entrega um orçamento e um cronograma. Você lê, faz perguntas, ajusta. Só depois ele compra material e começa. O plano do agente é esse orçamento. Não pula essa etapa, porque é nela que o erro fica barato. Aprovar uma má ideia em texto custa zero. Reverter um arquivo bagunçado custa tempo.
+</AnalogiaObra>
+
+## Passo 3: o diff
+
+Aprovado o plano, ele usa a ferramenta Read pra abrir o arquivo, monta a edição, e te mostra o diff. O diff é a comparação lado a lado entre o que tá no arquivo agora e o que ele quer deixar. Vai aparecer algo parecido com:
+
+```diff
+- function saudar(nome) {
+-   if (nome) {
+-     return "Olá, " + nome + "!";
+-   } else {
+-     return "Olá, visitante!";
+-   }
+- }
++ const saudar = (nome) => `Olá, ${nome || "visitante"}!`;
+```
+
+As linhas com `-` em vermelho são o que sai. As linhas com `+` em verde são o que entra. Você não precisa saber JavaScript profundamente pra ler isso. Você vê que a versão nova é uma linha só, que mantém a palavra "Olá", que continua usando a variável `nome`, e que ainda tem o fallback pra "visitante".
+
+<Callout tipo="dica" titulo="Como ler diff sem ser dev">
+Ignora a sintaxe. Olha as palavras-chave que importam pro comportamento. Se o nome da função (`saudar`) continua, se a saudação ("Olá") continua, se o caso do visitante continua, provavelmente tá ok. Se algum desses some sem explicação, pergunta antes de aprovar.
+</Callout>
+
+## Passo 4: a aprovação
+
+O Claude Code vai te perguntar algo como "Aplicar essa edição em `saudacao.js`?". Você responde sim ou não. Se aprovou, ele aplica via ferramenta Edit. Se rejeitou, ele te pergunta o que mudar e tenta de novo.
+
+Esse momento é seu freio de mão. Use sem culpa. Rejeitar um diff e pedir uma versão diferente é parte normal do fluxo. "Mantém o `if/else` explícito, só atualiza pra arrow function" é um pedido válido. O agente refaz na hora.
+
+## Passo 5: a verificação
+
+Depois de aplicar, ele provavelmente vai querer rodar algum teste ou pelo menos abrir o arquivo de novo pra confirmar que ficou como esperado. Em projetos maiores ele rodaria `npm test` via Bash e te mostraria a saída. Aqui, como é só um arquivo `.js` sem testes, ele vai te pedir pra confirmar visualmente que o diff está como você espera.
+
+Verde quer dizer "passou em todos os testes". Vermelho quer dizer "alguma coisa quebrou, preciso voltar". Se quebrar, o agente vai te avisar e propor um conserto. Isso também é normal. Software vivo quebra, e a graça é consertar rápido.
+
+<ExercicioPratico numero={2} titulo="Roda o ciclo completo na pasta de teste" tempo="15min">
+Esse exercício pressupõe que você já tem o Claude Code instalado (módulo 0). Se não tiver, volta pra lição "Instalando Claude Code" antes.
+
+1. Cria a pasta `teste-claude` com o arquivo `saudacao.js` mostrado no começo desta lição.
+2. Abre o terminal nessa pasta e digita `claude` pra iniciar o agente.
+3. Manda a instrução: "Refatora a função saudar no arquivo saudacao.js pra ficar mais curta e moderna."
+4. Lê o plano que ele propõe. Se não entender alguma palavra, pergunta antes de seguir.
+5. Aprova o plano. Espera ele mostrar o diff.
+6. Lê o diff. Confirma que o nome da função, a saudação e o fallback de visitante continuam.
+7. Aprova a edição. Espera ele aplicar.
+8. Se ele rodar um teste, vê o resultado. Se ele não rodar, pede: "roda npm test e me mostra a saída".
+9. Abre o arquivo `saudacao.js` no seu editor de texto pra ver, com seus olhos, que o código mudou de verdade.
+
+No final, escreve numa nota o que você sentiu nesse fluxo. Foi confortável? Foi assustador? Em que passo você travou? Esse registro vai te ajudar nas próximas lições.
+</ExercicioPratico>
+
+<Callout tipo="proximaParada" titulo="O que vem depois">
+Nas próximas lições a gente sobe a complexidade. Tarefas com múltiplos arquivos, contexto carregado via `CLAUDE.md`, skills que ensinam o agente a fazer coisas específicas. Mas o ciclo de cinco passos que você viu aqui vai estar em todas elas. Plano, diff, aprovação, execução, verificação. Esse é o ritmo.
+</Callout>
+
+<Checkpoint>
+Você rodou o ciclo completo de uma refatoração pequena. Viu o agente ler, planejar, propor diff, aplicar e verificar. Aprovou e rejeitou pelo menos uma vez. Confere o arquivo final no editor e bate com o que ele disse que ia fazer. Se chegou até aqui, você já sabe trabalhar com Claude Code no modo básico, e o resto do curso é construir em cima dessa base.
+</Checkpoint>
+
+## Pra ir mais fundo
+
+<FonteGratis tipo="doc" titulo="Quickstart do Claude Code" url="https://docs.claude.com/en/docs/claude-code" autor="Anthropic">
+A doc oficial tem um quickstart que faz um fluxo parecido com o desta lição. Vale rodar como segunda volta, com outro projeto seed pra fixar.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="ai-hero" url="https://github.com/ai-hero-dev/ai-hero" autor="Matt Pocock e equipe">
+Repositório do curso que originou esse material. Tem exemplos de tarefas reais que você pode tentar replicar depois que se sentir confortável com o ciclo básico.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="sandcastle" url="https://github.com/mattpocock/sandcastle" autor="Matt Pocock" stars="4.7k">
+Projeto sandbox pra praticar comandos de agente sem medo de quebrar nada importante. Bom segundo cenário pra testar refatorações depois do seed deste curso.
+</FonteGratis>

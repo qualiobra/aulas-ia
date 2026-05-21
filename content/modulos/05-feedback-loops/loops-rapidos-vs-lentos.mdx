@@ -1,0 +1,85 @@
+Tudo que o agente faz tem uma pergunta logo atrás: "deu certo?". O tempo entre ele agir e descobrir a resposta é o que define se o código vai ficar bom ou virar uma bagunça difícil de desatar. Esse intervalo é o feedback loop.
+
+Quanto mais rápido o agente sabe se errou, mais rápido ele corrige sozinho. Quanto mais lento, mais coisa errada se acumula em cima da primeira coisa errada.
+
+## Os três tempos de feedback
+
+Pensa em três velocidades, cada uma com um custo diferente.
+
+**Loop rápido (segundos).** TypeScript reclamando que o tipo está errado. ESLint apontando variável não usada. Teste unitário rodando uma função pura. O agente roda, vê o erro, ajusta na mesma resposta. É barato e quase grátis acionar.
+
+**Loop lento (minutos).** Build completo do Next.js, suite inteira de testes, teste end-to-end abrindo navegador. Aqui já dói, porque o agente fica esperando, gasta token escutando log, e às vezes nem chega no fim. Funciona, mas não dá pra rodar a cada linha.
+
+**Loop humano (horas ou dias).** Você abre o app, clica, descobre que o botão não funciona em mobile. Vai falar com o agente amanhã. O feedback voltou tão depois que ninguém mais lembra o contexto.
+
+A regra do Matt Pocock é simples: empurra o máximo de verificação pro loop rápido. O que não couber lá vai pro lento. E o que sobrar pro humano você aceita, mas sabe que custa caro.
+
+<AnalogiaObra titulo="Trena vs vistoria do engenheiro">
+Na obra é a mesma coisa.
+
+Trena na mão do pedreiro é loop rápido. Ele mede a parede, vê que tá 2cm fora do esquadro, corrige antes do reboco secar. Custa zero.
+
+Vistoria semanal do engenheiro é loop lento. Quando ele aparece, o reboco já endureceu, o cara já levantou três paredes em cima daquele esquadro torto. Corrigir agora é quebrar tudo.
+
+Cliente reclamando que a porta não fecha é loop humano. Obra entregue, escritura assinada, e agora você tá voltando lá com martelete.
+
+Quanto mais cedo a régua aparece, mais barato é o erro.
+</AnalogiaObra>
+
+## Por que isso muda tudo com agente
+
+Um humano programador sente preguiça de rodar teste o tempo todo. Abre o terminal, espera, lê, fecha. O agente não tem preguiça. Se você der pra ele um comando que roda em 2 segundos e responde "passou" ou "falhou na linha 47", ele vai rodar centenas de vezes numa sessão e ir afinando sozinho.
+
+Mas se o único jeito de saber se deu certo é rodar um build de 4 minutos, o agente vai chutar baseado em achismo, mandar a resposta e torcer. Aí você abre o app e tá quebrado.
+
+A diferença não é inteligência do modelo. É arquitetura do projeto.
+
+## O que aumenta a velocidade do loop
+
+Coisas que transformam loop lento em loop rápido:
+
+- **TypeScript strict ligado.** Erro de tipo aparece na hora.
+- **ESLint rodando no save.** Bobagem é pega antes de virar bug.
+- **Testes unitários pequenos e rápidos.** Uma função, uma asserção, milissegundos.
+- **Comandos de verificação que retornam código de saída claro.** `npm run typecheck` saindo com 0 ou 1.
+- **Mensagem de erro que diz arquivo e linha.** O agente precisa de coordenada, não de filosofia.
+
+E coisas que matam a velocidade:
+
+- Teste que precisa de banco real e dura 30 segundos.
+- Build que recompila tudo do zero.
+- Erro que só aparece em produção, com dado real.
+- Stack trace gigante sem apontar a linha.
+
+<Callout tipo="armadilha" titulo="Loop lento disfarçado de rápido">
+Cuidado com teste que parece rápido mas faz mock de meio mundo. Ele passa em 1 segundo e te dá confiança falsa. Quando você sobe pra produção, descobre que o mock mentiu. Loop rápido só vale se o que ele testa for verdade.
+</Callout>
+
+## Um exemplo concreto
+
+Imagina que você pede pro agente: "adiciona um campo `prazo_dias` no formulário de RDO e salva no banco".
+
+**Sem loop rápido:** ele escreve o código, manda pra você, você abre o app, preenche, salva, vê erro no console, copia, cola na conversa, espera ele ler, ajustar, repete. 4 idas e voltas, 20 minutos.
+
+**Com loop rápido:** typecheck pega o tipo errado na zod schema, teste unitário pega que o valor não tá sendo passado pro Supabase, lint pega variável duplicada. Tudo isso o agente vê sozinho, em segundos, antes mesmo de te mostrar a resposta. Quando chega na sua mão, o código já passou por três peneiras.
+
+A segunda versão é o que separa "agente que ajuda" de "agente que te dá mais trabalho".
+
+<ExercicioPratico numero={1} titulo="Mapeia teus loops" tempo="15min">
+Pega um projeto teu (mesmo que pequeno) e responde:
+
+1. Quanto tempo leva pra rodar `typecheck`? (se não tem, esse já é o primeiro alvo)
+2. Quanto tempo leva pra rodar a suite de testes inteira?
+3. Quanto tempo leva pra fazer build de produção?
+4. Quanto tempo leva pra você abrir o app, testar uma feature e voltar pro agente com o resultado?
+
+Anota os 4 números. Esses são os teus loops. Na próxima lição, a gente vai começar a encurtar eles.
+</ExercicioPratico>
+
+<Checkpoint>
+Você entendeu que o tempo entre "agente fez" e "agente sabe se deu certo" é a variável mais importante pra qualidade do trabalho. Loop rápido (segundos) é o ideal, lento (minutos) é tolerável, humano (horas) é caro. A meta de quem programa com agente é empurrar o máximo de verificação pro loop rápido.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="dictionary-of-ai-coding" url="https://github.com/mattpocock/dictionary-of-ai-coding" autor="Matt Pocock" stars="1.7k">
+Glossário que cobre o vocabulário de feedback loop e por que importa em coding agente.
+</FonteGratis>

@@ -1,0 +1,108 @@
+Guard-rail é a corrimão da escada. Não impede você de cair se você se jogar de propósito, mas impede o tropeço bobo de virar acidente sério. No teu projeto, guard-rail é tudo que automaticamente impede o agente de quebrar coisa sem você perceber.
+
+Sem guard-rail, o agente pode commitar código que nem compila. Pode renomear função e esquecer de atualizar onde ela é chamada. Pode introduzir bug de segurança que ninguém vê até dar problema. Com guard-rail, ele tenta e leva esbarrão na hora.
+
+## Os guard-rails que importam
+
+Tem quatro camadas que cobrem a maioria dos cenários:
+
+**1. No save (loop instantâneo).** Editor roda typecheck e lint a cada arquivo salvo. Erro aparece sublinhado em vermelho antes mesmo do agente terminar de pensar. Custo: zero, porque já tá rodando.
+
+**2. Pre-commit hook (loop curto).** Antes do commit entrar no histórico, roda automaticamente: typecheck, lint, formatador, talvez teste rápido. Se algo falha, o commit é bloqueado. Husky + lint-staged é o combo padrão. Custo: alguns segundos por commit.
+
+**3. CI (loop médio).** Depois do push, GitHub Actions roda a suite completa de testes, build de produção, talvez teste e2e. Se falha, o PR fica vermelho e não pode ser mergeado. Custo: minutos, mas roda em paralelo, não no teu computador.
+
+**4. Branch protection (loop social).** GitHub não deixa merge na main sem PR aprovado e CI verde. Custo: zero pra você, mas vale ouro.
+
+<AnalogiaObra titulo="As barreiras na escada da obra">
+Em obra séria, tem uma sequência de barreiras pra impedir acidente.
+
+Capacete e bota é o "no save". O cara não entra na obra sem isso, é checado na portaria. Impede o tropeço bobo.
+
+Linha de vida e cinto é o "pre-commit". Antes de subir no andaime, o cara verifica e engata. Se esquecer, o supervisor manda descer. Impede a queda.
+
+Vistoria do engenheiro responsável é o "CI". Periodicamente, alguém com vista treinada confere se tudo tá certo. Impede o erro estrutural.
+
+NR-18 e fiscal do MTE é o "branch protection". A lei impede que a obra continue se faltou item obrigatório. Impede o desastre.
+
+Cada camada pega um tipo de erro. Tirar uma porque "atrapalha" é como tirar o capacete porque "tá calor".
+</AnalogiaObra>
+
+## Como o agente se relaciona com guard-rail
+
+Agente bom usa guard-rail a favor. Você pede uma mudança, ele faz, roda typecheck no terminal, vê erro, corrige, roda de novo, e só te entrega quando tá verde. O guard-rail vira o sensor que ele consulta o tempo todo.
+
+Agente sem guard-rail é como pedreiro sem trena. Ele tenta fazer no olho. Às vezes acerta, às vezes erra grosso. E você só descobre quando o cliente final pisa em falso.
+
+A configuração faz diferença real. Tenta isso:
+
+- `tsconfig.json` com `"strict": true`. Tipa tudo.
+- ESLint com regras pra catch `any`, variável não usada, import errado.
+- Prettier rodando no save.
+- `npm run typecheck` e `npm run lint` como scripts no `package.json`, pra o agente conseguir rodar.
+
+Com isso, sua sessão com agente fica mais barata e mais segura.
+
+<Callout tipo="dica" titulo="Diz pro agente qual comando usar">
+Coloca no CLAUDE.md ou no system prompt: "antes de me entregar uma mudança, roda `npm run typecheck` e `npm run lint`. Se falhar, corrige antes de responder". O agente passa a fazer sozinho. Vira hábito do projeto, não do humano.
+</Callout>
+
+## Guard-rail bom vs teatro
+
+Nem todo guard-rail merece existir. Tem gente que coloca 50 regras de lint, hook gigante, CI que demora 20 minutos, e acha que tá seguro. Não tá. Tá lento.
+
+O critério pra decidir se um guard-rail vale a pena:
+
+**Bom guard-rail:**
+- Pega bug real que aconteceu antes (ou que claramente vai acontecer).
+- Roda rápido (não atrasa o fluxo).
+- Mensagem de erro aponta o problema (arquivo, linha, motivo).
+- Tem como desligar pontualmente quando faz sentido (com justificativa).
+
+**Teatro de guard-rail:**
+- Regra de estilo que ninguém respeita e todo mundo desliga com `// eslint-disable`.
+- Teste que sempre passa porque foi escrito pra passar, não pra falhar quando o código está errado.
+- CI que valida coisas redundantes (typecheck rodando 3 vezes em pipelines diferentes).
+- Hook que tem 40 etapas e ninguém sabe o que cada uma faz.
+
+A regra é: cada guard-rail tem que ter pago o custo dele em bugs evitados. Se nunca pegou nada, ou é cedo demais (ok, deixa rodando), ou é desnecessário (tira).
+
+<Callout tipo="armadilha" titulo="Pre-commit hook que ninguém respeita">
+Quando o hook é chato demais, o time aprende a usar `git commit --no-verify` pra burlar. Aí o guard-rail virou pior que nada, porque dá falsa sensação de segurança e o pessoal nem confia mais nele. Melhor ter 3 hooks bons que 10 hooks ignorados.
+</Callout>
+
+## Onde o agente erra sem guard-rail
+
+Casos reais que acontecem:
+
+- Agente renomeia uma função em um arquivo e esquece de atualizar a importação em outro. **Typecheck pega na hora.**
+- Agente adiciona um parâmetro novo numa função e esquece de passar onde ela é chamada. **Typecheck pega.**
+- Agente apaga um teste pra fazer o build passar. **Code review e CI rodando teste pegam.**
+- Agente commita `.env` por engano. **Pre-commit hook que checa gitignore pega.**
+- Agente sobe um schema do Supabase mas esquece de gerar tipos novos. **CI rodando `supabase gen types` e comparando pega.**
+
+Cada um desses é um guard-rail específico que vale o investimento. Cada bug que escapa uma vez vira a justificativa pro próximo guard-rail.
+
+<ExercicioPratico numero={1} titulo="Auditoria de guard-rails" tempo="15min">
+Pega um projeto teu e faz checklist:
+
+1. `tsconfig.json` tem `"strict": true`? Se não, liga.
+2. ESLint tá configurado? Roda `npm run lint` e vê se passa.
+3. Existe pre-commit hook? Se não, instala Husky + lint-staged.
+4. Existe CI rodando teste e build em PR? Se não, copia um workflow básico do GitHub Actions.
+5. Branch main tá protegida (não pode push direto, exige PR)? Se não, configura.
+
+Não precisa fazer tudo hoje. Marca o que falta. Vai resolvendo de um em um. Cada um que você ativa é uma classe inteira de bug que desaparece da sua vida.
+</ExercicioPratico>
+
+<Checkpoint>
+Você entendeu que guard-rail é configuração que impede o agente (e você) de quebrar coisa silenciosamente. As 4 camadas são save, pre-commit, CI, branch protection. Guard-rail bom roda rápido, pega bug real, mensagem clara. Teatro de guard-rail é regra que ninguém respeita ou validação redundante. Cada guard-rail tem que pagar o custo dele em bug evitado.
+</Checkpoint>
+
+<FonteGratis tipo="doc" titulo="Claude Code docs" url="https://docs.claude.com/en/docs/claude-code" autor="Anthropic">
+Documentação oficial do Claude Code com configuração de hooks, settings.json e permissões automatizadas.
+</FonteGratis>
+
+<FonteGratis tipo="repo" titulo="sandcastle" url="https://github.com/mattpocock/sandcastle" autor="Matt Pocock" stars="4.7k">
+Projeto base do Matt com setup de TypeScript strict, lint, testes e guard-rails configurados de fábrica.
+</FonteGratis>

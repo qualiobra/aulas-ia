@@ -1,0 +1,126 @@
+## O que a gente vai instalar
+
+Antes de qualquer aula, precisa de **três coisas funcionando** no seu computador:
+
+1. **Claude Code**: o agente de IA da Anthropic que roda no terminal.
+2. **Node.js**: runtime que o Claude Code usa por baixo.
+3. **Um terminal** que você consiga abrir sem suar (PowerShell, iTerm, etc).
+
+Se você é tipo "mas eu nunca abri um terminal", calma. A gente vai com calma. O canteiro de obra do Lucas começa em algum lugar, e esse é o nosso.
+
+<AnalogiaObra titulo="A obra começa com o canteiro montado">
+  Na obra civil, antes da primeira concretagem, você precisa do canteiro: vestiário, ferramenta no
+  almoxarifado, água, energia. Sem isso, ninguém produz nada. Aqui é igual. O terminal + Node +
+  Claude Code = o canteiro pronto. Sem montar isso, a aula vira teoria solta.
+</AnalogiaObra>
+
+## Passo 1: Instalar Node.js (se ainda não tem)
+
+Abre o PowerShell (Windows) ou Terminal (Mac) e digita:
+
+```bash
+node --version
+```
+
+Se aparecer algo como `v20.x.x` ou maior, tá ótimo, pula essa parte.
+
+Se aparecer "comando não encontrado", baixa o instalador em [nodejs.org](https://nodejs.org/) (versão LTS, botão verde). Próximo, próximo, instalar.
+
+<Callout tipo="armadilha" titulo="Não pega a versão 'Current'">
+  O site do Node oferece duas versões: **LTS** (recomendada) e **Current** (mais nova mas
+  instável). Pega LTS sempre. Curso usa LTS.
+</Callout>
+
+## Passo 2: Instalar o Claude Code
+
+No mesmo terminal:
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+Esse comando baixa o Claude Code e instala global (`-g`) no seu sistema. Pode demorar 1-2 minutos.
+
+Pra confirmar:
+
+```bash
+claude --version
+```
+
+Se aparecer um número de versão, tá pronto.
+
+## Passo 3: Fazer login na conta Anthropic
+
+Primeira vez que você rodar:
+
+```bash
+claude
+```
+
+Ele vai abrir o navegador pedindo pra você logar com sua conta Anthropic (a mesma que você usa em claude.ai). Faz o login, autoriza, volta pro terminal. Tá conectado.
+
+<Callout tipo="importa" titulo="Plano Pro recomendado">
+  O Claude Code consome créditos. No plano Pro (US$ 20/mês ou equivalente), você tem cota
+  bem confortável pro curso. Sem Pro, dá pra começar mas vai apertar rápido.
+</Callout>
+
+## Passo 4: Primeiro "hello obra"
+
+Cria uma pasta vazia em qualquer lugar (Desktop tá bom):
+
+```bash
+mkdir teste-claude
+cd teste-claude
+claude
+```
+
+Quando o prompt aparecer (ele fica esperando você), digita:
+
+```
+Cria um arquivo hello.txt com a frase "obra começou".
+```
+
+Aperta enter. O Claude vai te mostrar o que pretende fazer e pedir aprovação. Aprova. Confere a pasta: o arquivo tem que tar lá.
+
+<Checkpoint>
+Você terminou esta lição quando:
+
+1. `node --version` mostra v20 ou maior;
+2. `claude --version` mostra um número;
+3. Você logou na conta Anthropic via `claude`;
+4. Conseguiu criar um arquivo via Claude Code dentro de uma pasta vazia.
+
+Se travou em algum desses, **não pula**. Volta, descobre o erro, pergunta pra Iris ou pesquisa.
+Sem canteiro, sem obra.
+</Checkpoint>
+
+## Fontes grátis pra esta lição
+
+<FonteGratis
+  tipo="doc"
+  titulo="Documentação oficial: Setup do Claude Code"
+  url="https://docs.claude.com/en/docs/claude-code/quickstart"
+  autor="Anthropic"
+>
+  Guia passo-a-passo oficial, sempre atualizado. Em inglês mas com prints claros.
+</FonteGratis>
+
+<FonteGratis
+  tipo="repo"
+  titulo="mattpocock/skills"
+  url="https://github.com/mattpocock/skills"
+  autor="Matt Pocock"
+  stars="98k"
+>
+  Repositório com as skills do Matt. Não baixa nada ainda: só anota o link. Vamos voltar aqui
+  no módulo 03.
+</FonteGratis>
+
+<FonteGratis
+  tipo="video"
+  titulo="Claude Code: A Tour"
+  url="https://www.youtube.com/results?search_query=claude+code+tour+anthropic"
+  autor="Anthropic / YouTube"
+>
+  Tour rápido em vídeo da Anthropic. Bom complemento depois que tudo tá instalado.
+</FonteGratis>

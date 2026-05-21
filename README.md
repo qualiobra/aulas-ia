@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Aulas IA
 
-## Getting Started
+Webapp pessoal de estudo do curso **AI Coding for Real Engineers** do Matt Pocock ([aihero.dev](https://www.aihero.dev/cohorts/ai-coding-for-real-engineers-m0k0w)), reorganizado em 8 módulos (28 lições) com analogias de obra civil pra um engenheiro civil em transição pra tech.
 
-First, run the development server:
+Não é um produto comercial nem substitui o curso pago do Matt. É um caderno de obra digital pessoal do Lucas Araújo (Araújo Empreendimentos / QualiApps), publicado aberto pra quem quiser forkar e adaptar.
+
+## Stack
+
+- Next.js 16 (App Router, Turbopack) + TypeScript strict
+- Tailwind CSS v4 com design system Araújo (tokens em `app/globals.css`)
+- MDX (`@next/mdx`) pro conteúdo das lições
+- Zustand + `localStorage` pra progresso de estudo (zero servidor, zero login)
+- Plus Jakarta Sans + JetBrains Mono via `next/font`
+
+## Como rodar local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build de produção
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+Build gera 42 páginas estáticas (8 módulos + 28 lições + home + glossário + sobre + 404).
 
-To learn more about Next.js, take a look at the following resources:
+## Estrutura
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/
+  page.tsx                     home / cronograma
+  modulo/[slug]/page.tsx       página do módulo
+  modulo/[slug]/licao/[licao]/ página da lição (carrega MDX dinâmico)
+  glossario/                   16 termos de AI coding
+  sobre/                       sobre o projeto
+components/                    AnalogiaObra, Callout, Checkpoint,
+                               ExercicioPratico, FonteGratis, Glossario,
+                               Header, Footer, ProgressoLicao
+content/modulos/<slug>/        MDX de cada lição
+lib/
+  cronograma.ts                fonte da verdade (módulos + lições)
+  progresso.ts                 Zustand store persistido em localStorage
+mdx-components.tsx             componentes auto-injetados no MDX
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Conteúdo
 
-## Deploy on Vercel
+- **Estrutura dos módulos:** ementa pública do curso AI Hero (8 dias de estudo).
+- **Fontes técnicas:** repos gratuitos do Matt no GitHub (`mattpocock/skills`, `sandcastle`, `dictionary-of-ai-coding`, `evalite`, `ai-hero-dev/ai-hero`), documentação oficial da Anthropic, posts do aihero.dev.
+- **Linguagem / analogias / curadoria:** Iris (assistente IA do Lucas), com revisão humana.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Licença
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT. Forka, adapta, refaz com suas próprias analogias.
+
+## Créditos
+
+- [Matt Pocock](https://www.aihero.dev/) pelo curso original, pelos repos abertos e pelo trabalho de difusão.
+- [Anthropic](https://docs.claude.com/en/docs/claude-code) pelo Claude Code e pela documentação.
+
+---
+
+🌈 Iris · Araújo Empreendimentos · 2026

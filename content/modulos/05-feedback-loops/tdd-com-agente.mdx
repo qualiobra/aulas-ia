@@ -1,0 +1,104 @@
+TDD assusta porque parece coisa de programador purista, de palestra com slide preto. Esquece isso. No contexto de agente, TDD vira uma ferramenta de comunicação. Você descreve o comportamento que quer em forma de teste, mostra o teste falhando, e o agente sabe exatamente o que precisa construir.
+
+Não tem mistério. É só inverter a ordem.
+
+## A ordem normal (que dá ruim)
+
+Jeito que a maioria faz quando começa a usar agente:
+
+1. "Faz uma função que calcula desconto do cliente"
+2. Agente escreve a função
+3. Você olha, parece ok
+4. Sobe pra produção
+5. Cliente reclama que o cálculo tá errado em caso de PIX
+
+O problema: você nunca disse claramente o que era "certo". O agente chutou uma definição razoável, você aceitou, e o bug morava na diferença entre o que ele achou que era certo e o que você queria.
+
+## A ordem TDD (que funciona com agente)
+
+1. **Escreve o teste primeiro.** "Quando o cliente paga PIX e o valor é maior que 1000, o desconto é 5%."
+2. **Roda o teste e vê ele falhar.** Vermelho. Bom sinal. Significa que o teste mede algo real e ainda não tá implementado.
+3. **Pede pro agente implementar pra passar.** "Faz esse teste passar."
+4. **Vê o teste passar.** Verde.
+5. **Roda os outros testes pra garantir que não quebrou nada.**
+
+A diferença é que agora o "certo" tá escrito em código que executa, não em texto vago que o agente interpreta como quiser.
+
+<AnalogiaObra titulo="PEIS antes do serviço">
+Na obra, antes do servente subir na laje, o engenheiro emite um PEIS, o Procedimento de Execução de Inspeção de Serviço. O documento define o que conta como "certo": espessura mínima, tempo de cura, FCK do concreto, tolerância de esquadro.
+
+O servente executa. Depois o fiscal mede contra o PEIS. Se bater, paga. Se não bater, refaz.
+
+TDD é a mesma lógica. O teste é o PEIS. Você define o critério antes de qualquer linha de código existir. O agente executa pra atender o critério, não pra adivinhar.
+
+Sem PEIS, o servente faz "do jeito dele", e a discussão vira "mas eu achei que tava bom". Sem teste, o agente faz "do jeito dele", e a discussão vira a mesma coisa.
+</AnalogiaObra>
+
+## Como fica na prática
+
+Imagina que você quer uma função que formata CPF.
+
+**Passo 1, escreve o teste.** Você ou o agente (mas você revisa) escreve algo tipo:
+
+```ts
+test('formata CPF de 11 dígitos', () => {
+  expect(formatarCPF('12345678900')).toBe('123.456.789-00')
+})
+
+test('rejeita CPF com menos de 11 dígitos', () => {
+  expect(() => formatarCPF('123')).toThrow()
+})
+```
+
+**Passo 2, roda.** Vai dar erro porque `formatarCPF` nem existe. Vermelho. Ótimo.
+
+**Passo 3, pede pro agente.** "Implementa `formatarCPF` em `src/utils/cpf.ts` pra esses testes passarem."
+
+**Passo 4, agente entrega.** Roda os testes. Verde.
+
+**Passo 5, você lê o código.** Não pra revisar como humano detalhista, mas só pra ver se ele não fez nada estranho tipo desabilitar o teste pra "passar".
+
+<Callout tipo="dica" titulo="Pede teste primeiro mesmo quando esquecer">
+Quando você se pegar pedindo "implementa X", para, respira, e reformula: "escreve um teste que descreva X, depois implementa pra passar". Vira hábito em uma semana. Custa 30 segundos a mais e economiza horas de debug depois.
+</Callout>
+
+## TDD sem virar refém
+
+Não precisa ser purista. Algumas heurísticas que funcionam:
+
+- **Funções puras: TDD sempre.** Cálculo, parser, formatação, validação. Custo zero, ganho gigante.
+- **Lógica de negócio: TDD sempre.** Regra de desconto, cálculo de prazo, decisão de aprovação. É aqui que bug vira processo judicial.
+- **UI visual: TDD raramente.** Cor de botão, espaçamento, layout. Olho humano resolve mais rápido.
+- **Integração com API externa: teste, mas com cuidado.** Mock pra rodar rápido, teste e2e separado pra confirmar de vez em quando.
+
+A pergunta certa é "se isso quebrar silenciosamente, eu descubro quando?". Se a resposta é "quando o cliente reclamar", precisa de teste. Se é "na hora, porque o app fica visualmente errado", talvez não.
+
+<Callout tipo="armadilha" titulo="O agente apaga o teste pra passar">
+Já vi agente, quando frustrado, comentar o teste ou trocar a asserção pra `expect(true).toBe(true)`. Lê sempre o diff. Se o teste mudou junto com o código, desconfia. Pede explicitamente: "não altera os testes, só a implementação".
+</Callout>
+
+## TDD acelera o agente
+
+Aqui o pulo do gato: TDD não é só sobre qualidade. É feedback loop rápido. O teste roda em milissegundos e diz pro agente "passou" ou "falhou na linha tal". Sem teste, o feedback é você lendo o código, abrindo o app, testando na mão. Loop humano de minutos.
+
+Com teste, o agente entra num ciclo que ele mesmo opera: roda, vê falha, ajusta, roda de novo, passa. Você só aparece no fim pra revisar.
+
+<ExercicioPratico numero={1} titulo="Teu primeiro TDD com agente" tempo="15min">
+Escolhe uma função pequena que você precisa (formatar telefone, validar CNPJ, calcular juros simples, qualquer coisa).
+
+1. Pede pro agente: "escreve só os testes pra uma função `X`, sem implementar ainda. Pensa em pelo menos 3 casos, incluindo um caso ruim".
+2. Roda os testes. Confirma que falham.
+3. Pede: "agora implementa `X` pra passar nos testes, sem mudar os testes".
+4. Roda. Confirma que passa.
+5. Lê o diff e vê se o agente respeitou as regras.
+
+Anota: quanto tempo gastou? Quantas idas e voltas precisou? Compara mentalmente com o jeito antigo.
+</ExercicioPratico>
+
+<Checkpoint>
+Você entendeu que TDD com agente é simples: teste primeiro, ver falhar, agente implementa, ver passar. Não precisa ser purista. Use em função pura e lógica de negócio. Evite virar refém em UI visual. O ganho real é dar critério claro pro agente e criar feedback loop rápido.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="skills (TDD skill incluso)" url="https://github.com/mattpocock/skills" autor="Matt Pocock" stars="98k">
+Repo do Matt com skills reutilizáveis, incluindo workflow de TDD pra agente.
+</FonteGratis>
