@@ -46,6 +46,7 @@ components/                    AnalogiaObra, Callout, Checkpoint,
 content/modulos/<slug>/        MDX de cada lição
 content/extras/                MDX das aulas bônus
 public/videos/                 vídeos das aulas bônus
+scripts/video-art-openpipe/    fonte do vídeo do ART (roteiro, cenas, narração, render)
 lib/
   cronograma.ts                fonte da verdade (módulos + lições)
   progresso.ts                 Zustand store persistido em localStorage

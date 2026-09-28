@@ -1,0 +1,245 @@
+[
+  {
+    "id": "abertura",
+    "frases": [
+      {
+        "legenda": "Hoje você vai entender o ART, da OpenPipe, em poucos minutos.",
+        "fala": "Hoje você vai entender o Árt, da Ôpen Paipe, em poucos minutos."
+      },
+      {
+        "legenda": "ART é a sigla de Agent Reinforcement Trainer: treinador de agentes por reforço.",
+        "fala": "Árt é a sigla, em inglês, de treinador de agentes por reforço."
+      },
+      {
+        "legenda": "É open source, em Python, e serve pra uma coisa: fazer seu agente de IA aprender com a própria experiência.",
+        "fala": "É código aberto, em Páiton, e serve pra uma coisa: fazer seu agente de inteligência artificial aprender com a própria experiência."
+      }
+    ]
+  },
+  {
+    "id": "problema",
+    "frases": [
+      {
+        "legenda": "Imagina um agente que resolve tarefas em várias etapas: busca e-mails, usa ferramentas, toma decisões."
+      },
+      {
+        "legenda": "Com prompt, ele acerta às vezes. Mas chega um ponto em que mexer no prompt não melhora mais."
+      },
+      {
+        "legenda": "O ajuste fino tradicional exige um gabarito com a resposta certa pra cada exemplo. Pra agente, quase nunca existe esse gabarito."
+      },
+      {
+        "legenda": "O aprendizado por reforço inverte a lógica: o modelo tenta, recebe uma nota, e passa a repetir o que deu certo."
+      }
+    ]
+  },
+  {
+    "id": "analogia",
+    "frases": [
+      {
+        "legenda": "Pensa num aprendiz no canteiro de obra."
+      },
+      {
+        "legenda": "Você não escreve um manual com cada movimento da colher de pedreiro."
+      },
+      {
+        "legenda": "Você deixa ele levantar a parede, o fiscal vistoria e dá uma nota, e com o tempo ele aprende o que funciona."
+      },
+      {
+        "legenda": "O ART é o canteiro de treino desse aprendiz.",
+        "fala": "O Árt é o canteiro de treino desse aprendiz."
+      }
+    ]
+  },
+  {
+    "id": "vocabulario",
+    "frases": [
+      {
+        "legenda": "Cinco palavras que você vai ver o tempo todo."
+      },
+      {
+        "legenda": "Cenário: uma situação de treino. Por exemplo: “ache o e-mail sobre o contrato”."
+      },
+      {
+        "legenda": "Rollout: uma tentativa do agente naquele cenário.",
+        "fala": "Rôlaut: uma tentativa do agente naquele cenário."
+      },
+      {
+        "legenda": "Trajetória: o registro da tentativa, com todas as mensagens trocadas."
+      },
+      {
+        "legenda": "Recompensa: a nota que essa trajetória recebeu."
+      },
+      {
+        "legenda": "E grupo: várias tentativas do mesmo cenário, que vão ser comparadas entre si."
+      }
+    ]
+  },
+  {
+    "id": "arquitetura",
+    "frases": [
+      {
+        "legenda": "O ART é dividido em duas partes.",
+        "fala": "O Árt é dividido em duas partes."
+      },
+      {
+        "legenda": "O cliente roda junto do seu código, até no seu computador. Ele fala a mesma língua da API da OpenAI, então quase nada muda no seu agente.",
+        "fala": "O cliente roda junto do seu código, até no seu computador. Ele fala a mesma língua da api da Ôpen ei ai, então quase nada muda no seu agente."
+      },
+      {
+        "legenda": "O backend roda numa máquina com GPU. Ele usa o vLLM pra gerar respostas e treina um adaptador LoRA por cima do modelo base.",
+        "fala": "O béquend roda numa máquina com gê pê u. Ele usa o vê éle éle ême pra gerar respostas, e treina um adaptador Lóra por cima do modelo base."
+      },
+      {
+        "legenda": "Pensa no LoRA como um puxadinho: você amplia a obra sem demolir a estrutura.",
+        "fala": "Pensa no Lóra como um puxadinho: você amplia a obra sem demolir a estrutura."
+      },
+      {
+        "legenda": "Sem GPU? O ServerlessBackend, da Weights & Biases, cuida da infraestrutura. Com GPU? Use o LocalBackend.",
+        "fala": "Não tem gê pê u? O Sérverless Béquend, da Uêits end Báiases, cuida da infraestrutura. Tem gê pê u? Use o Lôucal Béquend."
+      }
+    ]
+  },
+  {
+    "id": "loop",
+    "frases": [
+      {
+        "legenda": "Agora, o coração do ART: o loop de treino.",
+        "fala": "Agora, o coração do Árt: o ciclo de treino."
+      },
+      {
+        "legenda": "1. Seu código roda vários rollouts em paralelo, e cada conversa vira uma trajetória.",
+        "fala": "Primeiro: seu código roda várias tentativas em paralelo, e cada conversa vira uma trajetória."
+      },
+      {
+        "legenda": "2. Cada trajetória recebe uma recompensa.",
+        "fala": "Segundo: cada trajetória recebe uma recompensa."
+      },
+      {
+        "legenda": "3. As trajetórias são agrupadas e enviadas ao backend. A inferência pausa enquanto ele treina com GRPO.",
+        "fala": "Terceiro: as trajetórias são agrupadas e enviadas ao béquend. A geração de respostas pausa, enquanto ele treina com gê erre pê ó."
+      },
+      {
+        "legenda": "4. O novo LoRA é salvo e carregado no vLLM, e o loop recomeça, agora com um modelo um pouco melhor.",
+        "fala": "Quarto: o novo Lóra é salvo e carregado no vê éle éle ême, e o ciclo recomeça, agora com um modelo um pouco melhor."
+      }
+    ]
+  },
+  {
+    "id": "grpo",
+    "frases": [
+      {
+        "legenda": "Mas como o GRPO decide o que reforçar? Comparando as tentativas dentro do grupo.",
+        "fala": "Mas como o gê erre pê ó decide o que reforçar? Comparando as tentativas dentro do grupo."
+      },
+      {
+        "legenda": "Quatro tentativas no mesmo cenário tiraram 0,9 · 0,6 · 0,3 e 0,2. A média é 0,5.",
+        "fala": "Imagina quatro tentativas no mesmo cenário, com notas zero vírgula nove, zero vírgula seis, zero vírgula três e zero vírgula dois. A média é zero vírgula cinco."
+      },
+      {
+        "legenda": "A vantagem de cada uma é a nota menos a média do grupo."
+      },
+      {
+        "legenda": "Acima da média, o comportamento é reforçado. Abaixo, é desencorajado."
+      },
+      {
+        "legenda": "Se todas tiram a mesma nota, a vantagem é zero, e o ART descarta essas tentativas: não há o que aprender.",
+        "fala": "Se todas tiram a mesma nota, a vantagem é zero, e o Árt descarta essas tentativas: não há o que aprender."
+      },
+      {
+        "legenda": "No código do ART é literalmente uma linha: vantagem = recompensa − média.",
+        "fala": "No código do Árt, é literalmente uma linha: vantagem, igual a recompensa menos a média."
+      }
+    ]
+  },
+  {
+    "id": "ruler",
+    "frases": [
+      {
+        "legenda": "E se você não souber escrever a função que dá a nota?"
+      },
+      {
+        "legenda": "Entra o RULER: outro modelo de linguagem faz o papel de juiz, lê as tentativas lado a lado e dá uma nota de 0 a 1 pra cada.",
+        "fala": "Aí entra o Rúler: outro modelo de linguagem faz o papel de juiz, lê as tentativas lado a lado, e dá uma nota de zero a um pra cada."
+      },
+      {
+        "legenda": "Comparar é mais fácil do que dar nota absoluta. E como o GRPO só olha a nota relativa, isso basta.",
+        "fala": "Comparar é mais fácil do que dar nota absoluta. E como o gê erre pê ó só olha a nota relativa, isso basta."
+      },
+      {
+        "legenda": "Resultado: dá pra treinar sem dados rotulados e sem função de recompensa feita à mão."
+      },
+      {
+        "legenda": "É o fiscal que põe as paredes lado a lado, em vez de medir cada uma com uma régua absoluta."
+      }
+    ]
+  },
+  {
+    "id": "codigo",
+    "frases": [
+      {
+        "legenda": "Na prática, o código cabe numa tela."
+      },
+      {
+        "legenda": "Você cria um TrainableModel com o modelo base e registra num backend.",
+        "fala": "Você cria um Treinâbol Módel, com o modelo base, e registra num béquend."
+      },
+      {
+        "legenda": "Escreve uma função rollout, que roda o agente num cenário e devolve uma trajetória com a recompensa.",
+        "fala": "Escreve uma função rôlaut, que roda o agente num cenário e devolve uma trajetória com a recompensa."
+      },
+      {
+        "legenda": "Junta grupos de 8 tentativas por cenário com gather_trajectory_groups, e deixa o RULER dar as notas.",
+        "fala": "Junta grupos de oito tentativas por cenário, com guéder trajéctori grups, e deixa o Rúler dar as notas."
+      },
+      {
+        "legenda": "Depois chama backend.train. Repete por alguns passos e acompanha a recompensa subindo.",
+        "fala": "Depois, chama béquend ponto trêin. Repete por alguns passos, e acompanha a recompensa subindo."
+      }
+    ]
+  },
+  {
+    "id": "resultados",
+    "frases": [
+      {
+        "legenda": "E funciona? A OpenPipe treinou um Qwen 2.5 de 14 bilhões de parâmetros pra pesquisar e-mails, e ele superou o o3 da OpenAI nessa tarefa.",
+        "fala": "E funciona? A Ôpen Paipe treinou um Cuên dois ponto cinco, de catorze bilhões de parâmetros, pra pesquisar e-mails. E ele superou o ó três, da Ôpen ei ai, nessa tarefa."
+      },
+      {
+        "legenda": "Os exemplos oficiais incluem 2048, jogo da velha, Codenames e agentes que usam servidores MCP.",
+        "fala": "Os exemplos oficiais incluem dois mil e quarenta e oito, jogo da velha, Coudneims, e agentes que usam servidores ême cê pê."
+      },
+      {
+        "legenda": "Você precisa de: um projeto que já usa um modelo de linguagem e uns 10 cenários que representem o mundo real.",
+        "fala": "Você precisa de: um projeto que já usa um modelo de linguagem, e uns dez cenários que representem o mundo real."
+      },
+      {
+        "legenda": "Você não precisa de: dataset rotulado, GPU no seu computador, nem doutorado em aprendizado por reforço.",
+        "fala": "Você não precisa de: dados rotulados, gê pê u no seu computador, nem doutorado em aprendizado por reforço."
+      }
+    ]
+  },
+  {
+    "id": "resumo",
+    "frases": [
+      {
+        "legenda": "Recapitulando."
+      },
+      {
+        "legenda": "O ART faz seu agente aprender tentando: várias tentativas, uma nota pra cada, e o GRPO reforça o que ficou acima da média.",
+        "fala": "O Árt faz seu agente aprender tentando: várias tentativas, uma nota pra cada, e o gê erre pê ó reforça o que ficou acima da média."
+      },
+      {
+        "legenda": "O cliente fica no seu código, o backend com GPU treina e serve o modelo, e o RULER dá as notas quando não existe gabarito.",
+        "fala": "O cliente fica no seu código, o béquend com gê pê u treina e serve o modelo, e o Rúler dá as notas quando não existe gabarito."
+      },
+      {
+        "legenda": "Pra começar: pip install openpipe-art e o notebook do 2048 no Colab.",
+        "fala": "Pra começar, instale o pacote ôpen paipe árt com o pip, e abra o nôutibuk do dois mil e quarenta e oito, no Côlab."
+      },
+      {
+        "legenda": "Bons estudos!"
+      }
+    ]
+  }
+]
