@@ -1,11 +1,18 @@
-"""Sintetiza a narração frase a frase (Piper, offline) e gera timeline.json + narracao.wav."""
+"""Monta a narração frase a frase e gera timeline.json + narracao.wav.
+
+uso:
+  python build_audio.py                    # sintetiza com Piper (offline)
+  python build_audio.py audio-elevenlabs   # usa um áudio pronto por frase (CC-FF.mp3)
+"""
 import io
 import json
+import subprocess
+import sys
 import wave
 from pathlib import Path
 
+import imageio_ffmpeg
 import numpy as np
-from piper import PiperVoice, SynthesisConfig
 
 AQUI = Path(__file__).parent
 VOZ = AQUI / ".cache" / "voices" / "pt_BR-jeff-medium.onnx"
@@ -16,18 +23,32 @@ TAIL = 0.9         # depois da última frase da cena
 FINAL_TAIL = 2.5   # respiro no fim do vídeo
 
 roteiro = json.loads((AQUI / "roteiro.json").read_text())
-voice = PiperVoice.load(str(VOZ))
-cfg = SynthesisConfig(length_scale=1.0, noise_scale=0.6, noise_w_scale=0.8)
-sr = voice.config.sample_rate
+PASTA = Path(sys.argv[1]) if len(sys.argv) > 1 else None
 
+if PASTA:
+    sr = 44100
 
-def sintetiza(texto: str) -> np.ndarray:
-    buf = io.BytesIO()
-    with wave.open(buf, "wb") as w:
-        voice.synthesize_wav(texto, w, syn_config=cfg)
-    buf.seek(0)
-    with wave.open(buf, "rb") as r:
-        return np.frombuffer(r.readframes(r.getnframes()), dtype=np.int16)
+    def fala(i: int, j: int, f: dict) -> np.ndarray:
+        pcm = subprocess.run(
+            [imageio_ffmpeg.get_ffmpeg_exe(), "-loglevel", "error", "-i", str(PASTA / f"{i:02d}-{j:02d}.mp3"),
+             "-f", "s16le", "-ac", "1", "-ar", str(sr), "-"],
+            capture_output=True, check=True,
+        ).stdout
+        return np.frombuffer(pcm, dtype=np.int16)
+else:
+    from piper import PiperVoice, SynthesisConfig
+
+    voice = PiperVoice.load(str(VOZ))
+    cfg = SynthesisConfig(length_scale=1.0, noise_scale=0.6, noise_w_scale=0.8)
+    sr = voice.config.sample_rate
+
+    def fala(i: int, j: int, f: dict) -> np.ndarray:
+        buf = io.BytesIO()
+        with wave.open(buf, "wb") as w:
+            voice.synthesize_wav(f.get("fala", f["legenda"]), w, syn_config=cfg)
+        buf.seek(0)
+        with wave.open(buf, "rb") as r:
+            return np.frombuffer(r.readframes(r.getnframes()), dtype=np.int16)
 
 
 def silencio(seg: float) -> np.ndarray:
@@ -43,7 +64,7 @@ for i, cena in enumerate(roteiro):
     t += LEAD_IN
     frases = []
     for j, f in enumerate(cena["frases"]):
-        audio = sintetiza(f.get("fala", f["legenda"]))
+        audio = fala(i, j, f)
         dur = len(audio) / sr
         frases.append({"inicio": round(t, 3), "fim": round(t + dur, 3), "legenda": f["legenda"]})
         pedacos.append(audio)
