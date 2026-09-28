@@ -33,6 +33,9 @@ export function Header() {
           <Link href="/glossario" className="hover:text-[#0F2E52]" style={{ textDecoration: "none", color: "inherit" }}>
             Glossário
           </Link>
+          <Link href="/extras/art" className="hover:text-[#0F2E52]" style={{ textDecoration: "none", color: "inherit" }}>
+            Bônus: ART
+          </Link>
           <Link href="/sobre" className="hover:text-[#0F2E52]" style={{ textDecoration: "none", color: "inherit" }}>
             Sobre
           </Link>

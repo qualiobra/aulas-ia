@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>ART explicado</title>
+<style>
+@font-face { font-family: "Jakarta"; font-weight: 400; src: url(.cache/fonts/fontsource-plus-jakarta-sans/files/plus-jakarta-sans-latin-400-normal.woff2); }
+@font-face { font-family: "Jakarta"; font-weight: 500; src: url(.cache/fonts/fontsource-plus-jakarta-sans/files/plus-jakarta-sans-latin-500-normal.woff2); }
+@font-face { font-family: "Jakarta"; font-weight: 600; src: url(.cache/fonts/fontsource-plus-jakarta-sans/files/plus-jakarta-sans-latin-600-normal.woff2); }
+@font-face { font-family: "Jakarta"; font-weight: 700; src: url(.cache/fonts/fontsource-plus-jakarta-sans/files/plus-jakarta-sans-latin-700-normal.woff2); }
+@font-face { font-family: "Jakarta"; font-weight: 800; src: url(.cache/fonts/fontsource-plus-jakarta-sans/files/plus-jakarta-sans-latin-800-normal.woff2); }
+@font-face { font-family: "JBM"; font-weight: 400; src: url(.cache/fonts/fontsource-jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2); }
+@font-face { font-family: "JBM"; font-weight: 700; src: url(.cache/fonts/fontsource-jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2); }
+
+:root {
+  --b950:#0A1F3D; --b900:#0F2E52; --b800:#173C6E; --b700:#1E4E89; --b600:#2A6BAE; --b500:#4A8BC8;
+  --b300:#A9CFE5; --b200:#CFE3F0; --b100:#E4EEF7; --b50:#F1F6FB;
+  --ok:#1F8A5B; --ok700:#14694A; --ok100:#E4F4EC;
+  --warn:#C77800; --warn700:#92580A; --warn100:#FBEACC; --warn50:#FDF4E2;
+  --bad:#B43B3B; --bad700:#8B2C2C; --bad100:#F7DDDD;
+  --ink9:#0E1726; --ink7:#2A3645; --ink6:#44505F; --ink5:#5A6A7C; --ink4:#7C8896; --line:#DCE3EB;
+  --sans: "Jakarta", "DejaVu Sans", sans-serif;
+  --mono: "JBM", "DejaVu Sans Mono", monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1280px; height: 720px; overflow: hidden; background: #F5F7FA; }
+body { font-family: var(--sans); color: var(--ink9); -webkit-font-smoothing: antialiased; }
+#stage { position: relative; width: 1280px; height: 720px; overflow: hidden;
+  background: radial-gradient(1200px 600px at 100% 0%, #EAF2FA 0%, #F5F7FA 55%); }
+.scene { position: absolute; inset: 0; visibility: hidden; }
+.scene.dark { background: linear-gradient(135deg, #0A1F3D 0%, #0F2E52 45%, #1E4E89 100%); color: #fff; }
+.kicker { position: absolute; left: 64px; top: 40px; font-size: 14px; font-weight: 800; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--b500); }
+.title { position: absolute; left: 64px; top: 64px; font-size: 38px; font-weight: 800; letter-spacing: -.02em; color: var(--b900); }
+#brand { position: absolute; right: 40px; top: 36px; display: flex; align-items: center; gap: 10px; font-size: 13px;
+  font-weight: 600; color: var(--ink5); z-index: 5; }
+#brand .logo { background: var(--b900); color: #fff; font-weight: 800; letter-spacing: .08em; padding: 4px 9px; border-radius: 6px; font-size: 13px; }
+#cap { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); max-width: 1100px; width: max-content;
+  padding: 11px 22px; border-radius: 12px; background: rgba(10,31,61,.9); color: #fff; font-size: 21px; line-height: 1.38;
+  font-weight: 500; text-align: center; z-index: 10; box-shadow: 0 6px 24px rgba(10,31,61,.25); }
+.chip { display: inline-block; padding: 7px 14px; border-radius: 999px; font-weight: 700; font-size: 16px; }
+.card { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 2px 10px rgba(15,46,82,.05); }
+.mono { font-family: var(--mono); }
+.hl-box { box-shadow: 0 0 0 calc(var(--a,0) * 3px) var(--b500), 0 calc(var(--a,0) * 10px) calc(var(--a,0) * 30px) rgba(30,78,137,calc(var(--a,0) * .25)); }
+
+/* ---------- abertura ---------- */
+.ab { position: absolute; left: 0; right: 0; text-align: center; }
+.ab-kicker { top: 118px; font-size: 15px; font-weight: 800; letter-spacing: .3em; color: var(--b300); }
+.ab-logo { top: 150px; font-size: 150px; font-weight: 800; letter-spacing: .06em; line-height: 1;
+  background: linear-gradient(180deg, #fff 30%, #A9CFE5 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ab-by { top: 318px; font-size: 18px; font-weight: 600; color: var(--b300); }
+.ab-expand { top: 368px; font-size: 34px; font-weight: 500; color: #fff; }
+.ab-expand b { color: #F2B349; font-weight: 800; }
+.ab-pt { top: 418px; font-size: 22px; font-weight: 600; color: var(--b200); font-style: italic; }
+.ab-chips { top: 478px; display: flex; justify-content: center; gap: 12px; }
+.ab-chips .chip { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.2); }
+.ab-chips .chip.hot { background: #F2B349; color: var(--b950); border-color: #F2B349; }
+
+/* ---------- problema ---------- */
+.flow { position: absolute; left: 64px; right: 64px; top: 150px; display: flex; align-items: center; justify-content: center; gap: 14px; }
+.flow .step { display: flex; align-items: center; gap: 10px; padding: 12px 18px; background: #fff; border: 1px solid var(--line);
+  border-radius: 12px; font-weight: 700; font-size: 18px; color: var(--b900); }
+.flow .step i { font-style: normal; width: 28px; height: 28px; border-radius: 50%; background: var(--b100); color: var(--b700);
+  display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+.flow .arr { color: var(--b300); font-size: 26px; font-weight: 700; }
+.trio { position: absolute; left: 64px; right: 64px; top: 238px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.trio .card { padding: 22px 24px; height: 318px; position: relative; }
+.card-k { font-size: 13px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); margin-bottom: 12px; }
+.trio h3 { font-size: 24px; font-weight: 800; color: var(--b900); margin-bottom: 10px; letter-spacing: -.01em; }
+.trio p { font-size: 17px; line-height: 1.45; color: var(--ink6); }
+.trio .viz { height: 112px; margin: 6px 0 14px; display: flex; align-items: center; justify-content: center; }
+.pair { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
+.pair span { padding: 8px 12px; border-radius: 8px; background: var(--b50); border: 1px solid var(--b200); color: var(--b800); }
+.pair span.q { background: var(--bad100); border-color: #E7B5B5; color: var(--bad700); }
+.trio .good { border-color: color-mix(in srgb, var(--ok) calc(var(--a,0)*100%), var(--line));
+  box-shadow: 0 0 0 calc(var(--a,0)*3px) var(--ok), 0 12px 30px rgba(31,138,91,calc(var(--a,0)*.18)); }
+.rlcycle { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 16px; }
+.rlcycle span { padding: 8px 12px; border-radius: 999px; background: var(--ok100); color: var(--ok700); }
+.rlcycle em { font-style: normal; color: var(--ok); font-size: 20px; }
+
+/* ---------- analogia ---------- */
+.wall { position: absolute; left: 64px; top: 140px; }
+.an-right { position: absolute; left: 700px; right: 64px; top: 170px; display: flex; flex-direction: column; gap: 18px; }
+.an-row { display: flex; gap: 14px; align-items: flex-start; font-size: 21px; font-weight: 600; line-height: 1.4; color: var(--ink7); }
+.an-row .ic { flex: 0 0 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; font-size: 20px; }
+.an-row.no .ic { background: var(--bad100); color: var(--bad); }
+.an-row.no span.t { text-decoration: line-through; text-decoration-color: rgba(180,59,59,.6); text-decoration-thickness: 2px; }
+.an-row.yes .ic { background: var(--ok100); color: var(--ok); }
+.an-big { margin-top: 10px; padding: 22px 24px; border-radius: 16px; background: var(--b900); color: #fff; font-size: 27px; font-weight: 800; line-height: 1.3; }
+.an-big small { display: block; font-size: 15px; font-weight: 600; color: var(--b300); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+.badge-nota { position: absolute; left: 470px; top: 170px; padding: 12px 16px; border-radius: 14px; background: #fff; border: 2px solid var(--ok);
+  box-shadow: 0 10px 30px rgba(31,138,91,.2); text-align: center; }
+.badge-nota .k { font-size: 12px; font-weight: 800; letter-spacing: .14em; color: var(--ok700); text-transform: uppercase; }
+.badge-nota .v { font-size: 34px; font-weight: 800; color: var(--ok); }
+
+/* ---------- vocabulário ---------- */
+.voc-cen { position: absolute; left: 64px; top: 268px; width: 236px; padding: 18px; }
+.voc-cen .card-k { color: var(--warn700); }
+.voc-cen p { font-size: 18px; font-weight: 700; color: var(--b900); line-height: 1.35; }
+.lane { position: absolute; left: 380px; width: 470px; height: 58px; display: flex; align-items: center; gap: 8px; padding: 0 14px;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+.lane .lbl { font-size: 13px; font-weight: 800; color: var(--ink5); width: 92px; letter-spacing: .04em; }
+.pill { height: 24px; border-radius: 7px; font-size: 11px; font-weight: 800; color: #fff; display: grid; place-items: center; padding: 0 8px; }
+.pill.sys { background: #7C8896; } .pill.usr { background: var(--b500); } .pill.ast { background: var(--b900); } .pill.tool { background: var(--warn); }
+.rw { position: absolute; left: 866px; width: 72px; height: 44px; border-radius: 10px; display: grid; place-items: center;
+  font-size: 20px; font-weight: 800; background: var(--warn50); color: var(--warn700); border: 2px solid var(--warn); }
+.grp { position: absolute; left: 364px; top: 182px; width: 592px; height: 334px; border: 3px dashed var(--b500); border-radius: 18px; }
+.grp span { position: absolute; top: -15px; left: 20px; background: #F5F7FA; padding: 0 10px; font-weight: 800; font-size: 14px; letter-spacing: .14em; color: var(--b600); }
+.legend { position: absolute; left: 990px; right: 40px; top: 170px; display: flex; flex-direction: column; gap: 10px; }
+.legend .it { padding: 11px 14px; border-radius: 12px; background: color-mix(in srgb, var(--b900) calc(var(--a,0)*100%), #fff);
+  border: 1px solid var(--line); color: color-mix(in srgb, #fff calc(var(--a,0)*100%), var(--b900)); }
+.legend .it b { display: block; font-size: 18px; font-weight: 800; }
+.legend .it small { font-size: 13px; font-weight: 600; opacity: .8; }
+
+/* ---------- arquitetura ---------- */
+.box { position: absolute; top: 150px; height: 370px; padding: 22px 24px; }
+.box h4 { font-size: 14px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--b600); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.box ul { list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 18px; font-weight: 600; color: var(--ink7); }
+.box li::before { content: "•"; color: var(--b500); margin-right: 8px; }
+.codechip { margin-top: 16px; display: inline-block; font-family: var(--mono); font-size: 16px; background: var(--b950); color: #CFE3F0; padding: 9px 14px; border-radius: 10px; }
+.sub { border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; font-size: 17px; font-weight: 700; color: var(--b900); background: var(--b50); border: 1px solid var(--b200); }
+.sub small { display: block; font-size: 14px; font-weight: 600; color: var(--ink5); margin-top: 2px; }
+.lora { position: relative; margin-top: 14px; height: 116px; }
+.lora .base { position: absolute; left: 0; right: 0; bottom: 0; height: 62px; border-radius: 10px; background: repeating-linear-gradient(90deg, #C7CDD5 0 36px, #B5BDC7 36px 38px);
+  display: grid; place-items: center; font-weight: 800; color: var(--ink7); font-size: 16px; }
+.lora .add { position: absolute; right: 18px; bottom: 66px; width: 190px; height: 44px; border-radius: 10px; background: var(--warn); color: #fff;
+  display: grid; place-items: center; font-weight: 800; font-size: 15px;
+  box-shadow: 0 0 0 calc(var(--a,0)*4px) rgba(199,120,0,.3), 0 calc(var(--a,0)*10px) calc(var(--a,0)*26px) rgba(199,120,0,.35); }
+.arrows { position: absolute; left: 470px; width: 290px; top: 205px; display: flex; flex-direction: column; gap: 42px; }
+.arrows .ar { position: relative; text-align: center; font-size: 14px; font-weight: 700; color: var(--ink6); padding-bottom: 10px; }
+.arrows .ar::after { content: ""; position: absolute; left: 22px; right: 22px; bottom: 0; height: 3px; background: var(--b500); border-radius: 2px; }
+.arrows .ar::before { content: ""; position: absolute; bottom: -5px; width: 0; height: 0; border-top: 6.5px solid transparent; border-bottom: 6.5px solid transparent; }
+.arrows .ar.r::before { right: 14px; border-left: 12px solid var(--b500); }
+.arrows .ar.l::before { left: 14px; border-right: 12px solid var(--b500); }
+.arrows .ar.warn::after { background: var(--warn); } .arrows .ar.warn.r::before { border-left-color: var(--warn); }
+.bk-row { position: absolute; left: 64px; right: 64px; top: 536px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.bk-row div { padding: 0 18px; height: 52px; display: flex; align-items: center; gap: 12px; border-radius: 12px; font-size: 17px; font-weight: 600; color: var(--ink7); background: #fff; border: 1px solid var(--line); }
+.bk-row b { font-family: var(--mono); font-size: 16px; color: var(--b800); }
+
+/* ---------- loop ---------- */
+.loop-svg { position: absolute; left: 40px; top: 118px; }
+.steps { position: absolute; left: 660px; right: 56px; top: 150px; display: flex; flex-direction: column; gap: 12px; }
+.steps .st { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: 14px; background: #fff; border: 1px solid var(--line); }
+.steps .n { flex: 0 0 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 17px;
+  background: color-mix(in srgb, var(--b700) calc(var(--a,0)*100%), var(--b100)); color: color-mix(in srgb, #fff calc(var(--a,0)*100%), var(--b700)); }
+.steps b { display: block; font-size: 19px; font-weight: 800; color: var(--b900); }
+.steps small { font-size: 15px; font-weight: 600; color: var(--ink5); }
+
+/* ---------- grpo ---------- */
+.chart { position: absolute; left: 64px; top: 130px; }
+.gr-right { position: absolute; left: 650px; right: 56px; top: 140px; display: flex; flex-direction: column; gap: 14px; }
+.formula { padding: 16px 20px; font-size: 25px; font-weight: 800; color: var(--b900); }
+.formula .k { font-size: 12px; letter-spacing: .14em; color: var(--ink5); text-transform: uppercase; margin-bottom: 4px; }
+.formula em { font-style: normal; color: var(--b600); }
+.inset { padding: 12px 18px; display: flex; align-items: center; gap: 18px; }
+.inset .bars { display: flex; align-items: flex-end; gap: 6px; height: 52px; }
+.inset .bars i { width: 16px; height: 36px; background: #A4ADB8; border-radius: 3px 3px 0 0; }
+.inset p { font-size: 16px; font-weight: 600; color: var(--ink6); line-height: 1.4; }
+.inset p b { color: var(--ink9); }
+.code { background: #0A1F3D; color: #D7E4F2; border-radius: 14px; padding: 14px 18px; font-family: var(--mono); font-size: 14px; line-height: 1.6; white-space: pre; font-variant-ligatures: none; }
+.code .ln { display: block; border-radius: 4px; margin: 0 -8px; padding: 0 8px;
+  background: rgba(242,179,73,calc(var(--a,0)*.2)); box-shadow: inset 3px 0 0 rgba(242,179,73,var(--a,0)); }
+.code .ln.dim { opacity: calc(1 - var(--d,0)*.55); }
+.tk-k { color: #C9A3FF; } .tk-s { color: #F2B349; } .tk-c { color: #7C8FA8; font-style: italic; } .tk-n { color: #7FD1B9; } .tk-f { color: #8CC4FF; }
+.code .file { color: #7C8FA8; font-size: 12px; margin-bottom: 6px; display: block; }
+
+/* ---------- ruler ---------- */
+.task { position: absolute; left: 64px; top: 132px; font-size: 18px; font-weight: 700; color: var(--ink6); }
+.task b { color: var(--b900); }
+.tj { position: absolute; left: 64px; width: 590px; height: 100px; padding: 14px 18px 14px 18px; display: flex; flex-direction: column; justify-content: center; }
+.tj .k { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); margin-bottom: 4px; }
+.tj p { font-size: 17px; font-weight: 600; color: var(--ink7); line-height: 1.35; padding-right: 86px; }
+.score { position: absolute; left: 574px; width: 70px; height: 50px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; font-weight: 800; }
+.score.q { background: var(--b50); border: 2px dashed var(--b300); color: var(--b500); }
+.score.s1 { background: var(--ok100); border: 2px solid var(--ok); color: var(--ok700); }
+.score.s2 { background: var(--warn50); border: 2px solid var(--warn); color: var(--warn700); }
+.score.s3 { background: var(--bad100); border: 2px solid var(--bad); color: var(--bad700); }
+.judge { position: absolute; left: 700px; top: 250px; width: 190px; text-align: center; }
+.judge .disc { width: 124px; height: 124px; margin: 0 auto 12px; border-radius: 50%; background: var(--b900); display: grid; place-items: center; box-shadow: 0 12px 30px rgba(15,46,82,.3); }
+.judge b { display: block; font-size: 22px; font-weight: 800; color: var(--b900); letter-spacing: .04em; }
+.judge small { font-size: 14px; font-weight: 600; color: var(--ink5); }
+.ru-right { position: absolute; left: 930px; right: 48px; top: 150px; display: flex; flex-direction: column; gap: 12px; }
+.ru-right .card { padding: 14px 16px; font-size: 16px; font-weight: 600; color: var(--ink7); line-height: 1.4; }
+.ru-right .card b { color: var(--b900); }
+.okchip { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 12px; background: var(--ok100); color: var(--ok700); font-weight: 800; font-size: 16px; }
+
+/* ---------- código ---------- */
+.codepanel { position: absolute; left: 64px; top: 126px; width: 850px; font-size: 13.6px; line-height: 1.44; padding: 14px 20px; }
+.notes { position: absolute; left: 936px; right: 40px; top: 150px; display: flex; flex-direction: column; gap: 12px; }
+.notes .nt { padding: 13px 15px; border-radius: 14px; background: color-mix(in srgb, var(--b900) calc(var(--a,0)*100%), #fff); border: 1px solid var(--line);
+  color: color-mix(in srgb, #fff calc(var(--a,0)*100%), var(--b900)); }
+.notes .nt b { display: block; font-size: 17px; font-weight: 800; }
+.notes .nt small { font-size: 13.5px; font-weight: 600; opacity: .85; }
+
+/* ---------- resultados ---------- */
+.arte { position: absolute; left: 64px; top: 140px; width: 560px; padding: 22px 24px; }
+.arte .tag { display: inline-block; background: var(--b900); color: #fff; font-weight: 800; font-size: 14px; letter-spacing: .1em; padding: 5px 10px; border-radius: 8px; margin-bottom: 12px; }
+.arte h3 { font-size: 27px; font-weight: 800; color: var(--b900); line-height: 1.25; letter-spacing: -.01em; margin-bottom: 14px; }
+.vs { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.vs div { padding: 10px 14px; border-radius: 12px; font-weight: 800; font-size: 17px; }
+.vs .win { background: var(--ok100); color: var(--ok700); border: 2px solid var(--ok); }
+.vs .lose { background: #EEF1F4; color: var(--ink6); border: 2px solid #C7CDD5; }
+.vs span { font-weight: 800; color: var(--ink4); }
+.arte .src { font-size: 13px; font-weight: 600; color: var(--ink4); font-family: var(--mono); }
+.exs { position: absolute; left: 64px; width: 560px; top: 432px; }
+.exs .card-k { margin-bottom: 10px; }
+.exs .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.exs .chip { background: #fff; border: 1px solid var(--line); color: var(--b800); font-size: 15px; }
+.need { position: absolute; left: 660px; right: 56px; padding: 18px 22px; }
+.need h4 { font-size: 14px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 10px; }
+.need ul { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 19px; font-weight: 700; color: var(--ink7); }
+.need li span { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; margin-right: 10px; font-size: 15px; color: #fff; }
+.need.yes { top: 140px; border-left: 5px solid var(--ok); } .need.yes h4 { color: var(--ok700); } .need.yes li span { background: var(--ok); }
+.need.no { top: 330px; border-left: 5px solid var(--bad); } .need.no h4 { color: var(--bad700); } .need.no li span { background: var(--bad); }
+
+/* ---------- resumo ---------- */
+.rs-kicker { position: absolute; left: 96px; top: 70px; font-size: 14px; font-weight: 800; letter-spacing: .24em; color: var(--b300); }
+.rs-title { position: absolute; left: 96px; top: 94px; font-size: 46px; font-weight: 800; letter-spacing: -.02em; }
+.rs-list { position: absolute; left: 96px; right: 96px; top: 176px; display: flex; flex-direction: column; gap: 14px; }
+.rs-list .it { display: flex; gap: 16px; align-items: center; padding: 14px 18px; border-radius: 14px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); font-size: 21px; font-weight: 600; line-height: 1.35; }
+.rs-list .it i { font-style: normal; flex: 0 0 38px; height: 38px; border-radius: 10px; background: #F2B349; color: var(--b950); display: grid; place-items: center; font-weight: 800; }
+.rs-cmd { position: absolute; left: 96px; top: 430px; display: flex; gap: 16px; align-items: center; }
+.rs-cmd .term { font-family: var(--mono); font-size: 22px; background: #06101D; color: #7FD1B9; padding: 14px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,.15); }
+.rs-cmd .term span { color: #7C8FA8; }
+.rs-cmd .more { font-size: 17px; font-weight: 600; color: var(--b200); line-height: 1.5; }
+.rs-bye { position: absolute; right: 96px; top: 432px; text-align: right; }
+.rs-bye b { display: block; font-size: 40px; font-weight: 800; color: #F2B349; }
+.rs-bye small { font-size: 14px; font-weight: 700; letter-spacing: .16em; color: var(--b300); text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="brand"><span class="logo">ART</span><span>OpenPipe · explicado em PT-BR</span></div>
+
+  <!-- ============ 0 · ABERTURA ============ -->
+  <section class="scene dark" data-id="abertura">
+    <div class="ab ab-kicker" data-r="0">AULAS IA · BÔNUS</div>
+    <div class="ab ab-logo" data-r="0" data-anim="pop">ART</div>
+    <div class="ab ab-by" data-r="0" data-p="0.35">por OpenPipe · github.com/OpenPipe/ART</div>
+    <div class="ab ab-expand" data-r="1"><b>A</b>gent <b>R</b>einforcement <b>T</b>rainer</div>
+    <div class="ab ab-pt" data-r="1" data-p="0.5">= treinador de agentes por reforço</div>
+    <div class="ab ab-chips">
+      <span class="chip" data-r="2" data-p="0">open source · Apache-2.0</span>
+      <span class="chip" data-r="2" data-p="0.12">Python</span>
+      <span class="chip hot" data-r="2" data-p="0.5">aprende com a própria experiência</span>
+    </div>
+  </section>
+
+  <!-- ============ 1 · PROBLEMA ============ -->
+  <section class="scene" data-id="problema">
+    <div class="kicker">01 · O problema</div>
+    <h2 class="title">Por que aprendizado por reforço?</h2>
+    <div class="flow">
+      <div class="step" data-r="0" data-p="0.25"><i>1</i>Busca e-mails</div><div class="arr" data-r="0" data-p="0.35">→</div>
+      <div class="step" data-r="0" data-p="0.45"><i>2</i>Usa ferramentas</div><div class="arr" data-r="0" data-p="0.55">→</div>
+      <div class="step" data-r="0" data-p="0.65"><i>3</i>Toma decisões</div><div class="arr" data-r="0" data-p="0.75">→</div>
+      <div class="step" data-r="0" data-p="0.85"><i>4</i>Responde</div>
+    </div>
+    <div class="trio">
+      <div class="card" data-r="1">
+        <div class="card-k">Só prompt</div>
+        <h3>Chega num teto</h3>
+        <div class="viz">
+          <svg width="300" height="112" viewBox="0 0 300 112">
+            <line x1="10" y1="100" x2="290" y2="100" stroke="#DCE3EB" stroke-width="2"/>
+            <line x1="10" y1="30" x2="290" y2="30" stroke="#B43B3B" stroke-width="2" stroke-dasharray="6 6" data-r="1" data-p="0.55"/>
+            <text x="290" y="22" text-anchor="end" font-size="13" font-weight="800" fill="#B43B3B" data-r="1" data-p="0.55">teto</text>
+            <path d="M10 96 C 60 70, 90 44, 140 36 S 230 33, 290 34" fill="none" stroke="#1E4E89" stroke-width="4" stroke-linecap="round" data-r="1" data-anim="draw"/>
+          </svg>
+        </div>
+        <p>Acerta às vezes. Depois de um ponto, mexer no prompt não melhora mais.</p>
+      </div>
+      <div class="card" data-r="2">
+        <div class="card-k">Ajuste fino (SFT)</div>
+        <h3>Precisa de gabarito</h3>
+        <div class="viz"><div class="pair"><span>entrada</span>→<span class="q">resposta certa?</span></div></div>
+        <p>Um exemplo com a resposta certa pra cada caso. Pra agente, quase nunca existe.</p>
+      </div>
+      <div class="card good" data-r="3" data-on="3">
+        <div class="card-k" style="color:var(--ok700)">Reforço (RL)</div>
+        <h3>Aprende tentando</h3>
+        <div class="viz"><div class="rlcycle"><span>tenta</span><em>→</em><span>nota</span><em>→</em><span>repete o que deu certo</span></div></div>
+        <p>O modelo tenta, recebe uma nota e reforça o comportamento que funcionou.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 · ANALOGIA ============ -->
+  <section class="scene" data-id="analogia">
+    <div class="kicker">02 · Na linguagem do canteiro</div>
+    <h2 class="title">O aprendiz e o fiscal</h2>
+    <svg class="wall" width="600" height="440" viewBox="0 0 600 440" id="wallsvg">
+      <line x1="20" y1="400" x2="580" y2="400" stroke="#7C8896" stroke-width="4" stroke-linecap="round"/>
+      <g id="bricks"></g>
+      <!-- aprendiz -->
+      <g transform="translate(20 250)"><g data-r="0">
+        <circle cx="40" cy="44" r="22" fill="#F2D2B0"/>
+        <path d="M14 40 a26 26 0 0 1 52 0 z" fill="#F2B349"/>
+        <rect x="10" y="38" width="60" height="7" rx="3" fill="#C77800"/>
+        <path d="M10 150 L 18 78 Q 40 64 62 78 L 70 150 z" fill="#1E4E89"/>
+        <text x="40" y="176" text-anchor="middle" font-size="15" font-weight="800" fill="#0F2E52">aprendiz</text>
+      </g></g>
+      <!-- fiscal -->
+      <g transform="translate(500 250)"><g data-r="2" data-p="0.3">
+        <circle cx="40" cy="44" r="22" fill="#E8C29C"/>
+        <path d="M14 40 a26 26 0 0 1 52 0 z" fill="#FFFFFF" stroke="#C7CDD5" stroke-width="2"/>
+        <path d="M10 150 L 18 78 Q 40 64 62 78 L 70 150 z" fill="#44505F"/>
+        <rect x="46" y="88" width="30" height="38" rx="4" fill="#fff" stroke="#0F2E52" stroke-width="3"/>
+        <path d="M53 108 l6 6 l11 -13" fill="none" stroke="#1F8A5B" stroke-width="3.5" stroke-linecap="round"/>
+        <text x="40" y="176" text-anchor="middle" font-size="15" font-weight="800" fill="#0F2E52">fiscal</text>
+      </g></g>
+    </svg>
+    <div class="badge-nota" data-r="2" data-p="0.5" data-anim="pop"><div class="k">vistoria</div><div class="v">nota 0,8</div></div>
+    <div class="an-right">
+      <div class="an-row no" data-r="1"><div class="ic">✗</div><span class="t">Manual com cada movimento da colher</span></div>
+      <div class="an-row yes" data-r="2"><div class="ic">✓</div><span>Levanta a parede → vistoria → nota → aprende o que funciona</span></div>
+      <div class="an-big" data-r="3" data-anim="pop"><small>Em resumo</small>ART é o canteiro de treino do seu agente</div>
+    </div>
+  </section>
+
+  <!-- ============ 3 · VOCABULÁRIO ============ -->
+  <section class="scene" data-id="vocabulario">
+    <div class="kicker">03 · Vocabulário mínimo</div>
+    <h2 class="title">Cinco palavras</h2>
+    <svg style="position:absolute;left:0;top:0" width="1280" height="720">
+      <g stroke="#A9CFE5" stroke-width="3" fill="none" stroke-linecap="round">
+        <path d="M300 340 C 340 340, 340 229, 380 229" data-r="2" data-anim="draw"/>
+        <path d="M300 340 C 340 340, 340 305, 380 305" data-r="2" data-p="0.1" data-anim="draw"/>
+        <path d="M300 340 C 340 340, 340 381, 380 381" data-r="2" data-p="0.2" data-anim="draw"/>
+        <path d="M300 340 C 340 340, 340 457, 380 457" data-r="2" data-p="0.3" data-anim="draw"/>
+      </g>
+    </svg>
+    <div class="card voc-cen hl-box" data-r="1" data-on="1" data-off="2">
+      <div class="card-k">Cenário</div>
+      <p>“Ache o e-mail sobre o contrato”</p>
+    </div>
+    <div class="grp" data-r="5"><span>GRUPO · MESMO CENÁRIO</span></div>
+    <div class="lane" style="top:200px" data-r="2" data-p="0.1"><span class="lbl">TENTATIVA 1</span>
+      <span class="pill sys" data-r="3" data-p="0.05">system</span><span class="pill usr" data-r="3" data-p="0.12">user</span><span class="pill ast" data-r="3" data-p="0.2">assistant</span><span class="pill tool" data-r="3" data-p="0.28">tool</span><span class="pill ast" data-r="3" data-p="0.36">assistant</span></div>
+    <div class="lane" style="top:276px" data-r="2" data-p="0.2"><span class="lbl">TENTATIVA 2</span>
+      <span class="pill sys" data-r="3" data-p="0.1">system</span><span class="pill usr" data-r="3" data-p="0.17">user</span><span class="pill ast" data-r="3" data-p="0.25">assistant</span></div>
+    <div class="lane" style="top:352px" data-r="2" data-p="0.3"><span class="lbl">TENTATIVA 3</span>
+      <span class="pill sys" data-r="3" data-p="0.15">system</span><span class="pill usr" data-r="3" data-p="0.22">user</span><span class="pill ast" data-r="3" data-p="0.3">assistant</span><span class="pill tool" data-r="3" data-p="0.38">tool</span><span class="pill ast" data-r="3" data-p="0.46">assistant</span><span class="pill tool" data-r="3" data-p="0.54">tool</span></div>
+    <div class="lane" style="top:428px" data-r="2" data-p="0.4"><span class="lbl">TENTATIVA 4</span>
+      <span class="pill sys" data-r="3" data-p="0.2">system</span><span class="pill usr" data-r="3" data-p="0.27">user</span><span class="pill ast" data-r="3" data-p="0.35">assistant</span><span class="pill tool" data-r="3" data-p="0.43">tool</span></div>
+    <div class="rw" style="top:207px" data-r="4" data-p="0.2" data-anim="pop">0,9</div>
+    <div class="rw" style="top:283px" data-r="4" data-p="0.3" data-anim="pop">0,2</div>
+    <div class="rw" style="top:359px" data-r="4" data-p="0.4" data-anim="pop">0,6</div>
+    <div class="rw" style="top:435px" data-r="4" data-p="0.5" data-anim="pop">0,3</div>
+    <div class="legend">
+      <div class="it" data-r="1" data-on="1" data-off="2"><b>Cenário</b><small>scenario · situação de treino</small></div>
+      <div class="it" data-r="2" data-on="2" data-off="3"><b>Rollout</b><small>uma tentativa do agente</small></div>
+      <div class="it" data-r="3" data-on="3" data-off="4"><b>Trajetória</b><small>Trajectory · as mensagens da tentativa</small></div>
+      <div class="it" data-r="4" data-on="4" data-off="5"><b>Recompensa</b><small>reward · a nota</small></div>
+      <div class="it" data-r="5" data-on="5"><b>Grupo</b><small>TrajectoryGroup · tentativas comparadas</small></div>
+    </div>
+  </section>
+
+  <!-- ============ 4 · ARQUITETURA ============ -->
+  <section class="scene" data-id="arquitetura">
+    <div class="kicker">04 · Arquitetura</div>
+    <h2 class="title">Cliente × Backend</h2>
+    <div class="card box hl-box" style="left:64px;width:400px" data-r="1" data-on="1" data-off="2">
+      <h4>
+        <svg width="30" height="22" viewBox="0 0 30 22"><rect x="4" y="1" width="22" height="15" rx="2" fill="none" stroke="#2A6BAE" stroke-width="2.5"/><path d="M1 20 h28" stroke="#2A6BAE" stroke-width="3" stroke-linecap="round"/></svg>
+        Cliente ART
+      </h4>
+      <ul>
+        <li>Roda junto do seu código</li>
+        <li>Até no seu computador (sem GPU)</li>
+        <li>API compatível com a da OpenAI</li>
+        <li>Guarda cada conversa como trajetória</li>
+      </ul>
+      <div class="codechip">model.openai_client()</div>
+    </div>
+    <div class="arrows">
+      <div class="ar r" data-r="1" data-p="0.6">pedidos de resposta</div>
+      <div class="ar l" data-r="2" data-p="0.2">respostas do modelo</div>
+      <div class="ar r warn" data-r="2" data-p="0.4">trajetórias com nota</div>
+    </div>
+    <div class="card box hl-box" style="left:766px;width:450px" data-r="2" data-on="2" data-off="3">
+      <h4>
+        <svg width="26" height="24" viewBox="0 0 26 24"><rect x="2" y="3" width="22" height="18" rx="3" fill="none" stroke="#2A6BAE" stroke-width="2.5"/><path d="M7 3v-2M13 3v-2M19 3v-2M7 23v-2M13 23v-2M19 23v-2" stroke="#2A6BAE" stroke-width="2"/><rect x="8" y="8" width="10" height="8" rx="1.5" fill="#2A6BAE"/></svg>
+        Backend ART · GPU
+      </h4>
+      <div class="sub">vLLM<small>gera as respostas (inferência)</small></div>
+      <div class="sub">Treino com GRPO<small>atualiza os pesos a partir das notas</small></div>
+      <div class="lora" data-r="3">
+        <div class="add" data-on="3" data-off="4">LoRA · o puxadinho</div>
+        <div class="base">Modelo base (estrutura intacta)</div>
+      </div>
+    </div>
+    <div class="bk-row">
+      <div data-r="4"><b>ServerlessBackend</b> sem GPU: a W&amp;B cuida da infra</div>
+      <div data-r="4" data-p="0.6"><b>LocalBackend</b> com GPU: roda na sua máquina</div>
+    </div>
+  </section>
+
+  <!-- ============ 5 · LOOP ============ -->
+  <section class="scene" data-id="loop">
+    <div class="kicker">05 · O coração do ART</div>
+    <h2 class="title">O loop de treino</h2>
+    <svg class="loop-svg" width="600" height="480" viewBox="0 0 600 480">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#A9CFE5"/></marker>
+      </defs>
+      <g data-r="0">
+        <circle cx="300" cy="250" r="170" fill="none" stroke="#CFE3F0" stroke-width="10"/>
+        <path d="M 420 130 A 170 170 0 0 1 450 170" fill="none" stroke="#A9CFE5" stroke-width="4" marker-end="url(#ah)"/>
+        <path d="M 450 330 A 170 170 0 0 1 420 370" fill="none" stroke="#A9CFE5" stroke-width="4" marker-end="url(#ah)"/>
+        <path d="M 180 370 A 170 170 0 0 1 150 330" fill="none" stroke="#A9CFE5" stroke-width="4" marker-end="url(#ah)"/>
+        <path d="M 150 170 A 170 170 0 0 1 180 130" fill="none" stroke="#A9CFE5" stroke-width="4" marker-end="url(#ah)"/>
+      </g>
+      <circle id="loopdot" cx="300" cy="80" r="13" fill="#F2B349" stroke="#fff" stroke-width="4"/>
+      <g data-r="0" data-p="0.3">
+        <text x="300" y="236" text-anchor="middle" font-size="15" font-weight="800" fill="#5A6A7C" letter-spacing="2">PASSO</text>
+        <text id="passo1" x="300" y="290" text-anchor="middle" font-size="56" font-weight="800" fill="#0F2E52">1</text>
+        <text id="passo2" x="300" y="290" text-anchor="middle" font-size="56" font-weight="800" fill="#1F8A5B" opacity="0">2</text>
+      </g>
+      <g transform="translate(300 80)"><g class="node" data-r="1" data-on="1" data-off="2"><rect x="-92" y="-30" width="184" height="60" rx="14"/><text y="-4" text-anchor="middle">1 · Rollouts</text><text y="16" text-anchor="middle" class="s">em paralelo</text></g></g>
+      <g transform="translate(470 250)"><g class="node" data-r="2" data-on="2" data-off="3"><rect x="-80" y="-30" width="160" height="60" rx="14"/><text y="-4" text-anchor="middle">2 · Nota</text><text y="16" text-anchor="middle" class="s">reward</text></g></g>
+      <g transform="translate(300 420)"><g class="node" data-r="3" data-on="3" data-off="4"><rect x="-92" y="-30" width="184" height="60" rx="14"/><text y="-4" text-anchor="middle">3 · Treino</text><text y="16" text-anchor="middle" class="s">GRPO no backend</text></g></g>
+      <g transform="translate(130 250)"><g class="node" data-r="4" data-on="4"><rect x="-86" y="-30" width="172" height="60" rx="14"/><text y="-4" text-anchor="middle">4 · Novo LoRA</text><text y="16" text-anchor="middle" class="s">carregado no vLLM</text></g></g>
+    </svg>
+    <style>
+      .node rect { fill: color-mix(in srgb, #0F2E52 calc(var(--a,0)*100%), #fff); stroke: color-mix(in srgb, #0F2E52 calc(var(--a,0)*100%), #DCE3EB); stroke-width: 2; }
+      .node text { font-family: var(--sans); font-size: 17px; font-weight: 800; fill: color-mix(in srgb, #fff calc(var(--a,0)*100%), #0F2E52); }
+      .node text.s { font-size: 13px; font-weight: 600; fill: color-mix(in srgb, #CFE3F0 calc(var(--a,0)*100%), #5A6A7C); }
+    </style>
+    <div class="steps">
+      <div class="st" data-r="1" data-on="1" data-off="2"><div class="n">1</div><div><b>Inferência: vários rollouts</b><small>Em paralelo. Cada conversa vira uma Trajectory.</small></div></div>
+      <div class="st" data-r="2" data-on="2" data-off="3"><div class="n">2</div><div><b>Recompensa</b><small>Sua função de nota, ou o RULER.</small></div></div>
+      <div class="st" data-r="3" data-on="3" data-off="4"><div class="n">3</div><div><b>Treino com GRPO</b><small>Grupos vão pro backend. A inferência pausa.</small></div></div>
+      <div class="st" data-r="4" data-on="4"><div class="n">4</div><div><b>Checkpoint novo</b><small>LoRA salvo e carregado no vLLM. Recomeça.</small></div></div>
+    </div>
+  </section>
+
+  <!-- ============ 6 · GRPO ============ -->
+  <section class="scene" data-id="grpo">
+    <div class="kicker">06 · GRPO sem medo</div>
+    <h2 class="title">Nota relativa ao grupo</h2>
+    <svg class="chart" width="560" height="450" viewBox="0 0 560 450">
+      <style>
+        .bar { fill: color-mix(in srgb, var(--c) calc(var(--a,0)*100%), #7C99B8); }
+      </style>
+      <line x1="30" y1="370" x2="540" y2="370" stroke="#A4ADB8" stroke-width="2"/>
+      <line x1="30" y1="110" x2="30" y2="370" stroke="#DCE3EB" stroke-width="2"/>
+      <text x="22" y="115" text-anchor="end" font-size="13" fill="#7C8896" font-weight="700">1,0</text>
+      <text x="22" y="374" text-anchor="end" font-size="13" fill="#7C8896" font-weight="700">0</text>
+      <!-- barras: escala 260px = 1,0 -->
+      <g data-on="3" style="--c:#1F8A5B"><rect class="bar" x="70"  y="136" width="80" height="234" rx="6" data-r="1" data-p="0.12" data-anim="grow"/></g>
+      <g data-on="3" style="--c:#1F8A5B"><rect class="bar" x="190" y="214" width="80" height="156" rx="6" data-r="1" data-p="0.28" data-anim="grow"/></g>
+      <g data-on="3" style="--c:#B43B3B"><rect class="bar" x="310" y="292" width="80" height="78"  rx="6" data-r="1" data-p="0.44" data-anim="grow"/></g>
+      <g data-on="3" style="--c:#B43B3B"><rect class="bar" x="430" y="318" width="80" height="52"  rx="6" data-r="1" data-p="0.6" data-anim="grow"/></g>
+      <g font-size="18" font-weight="800" fill="#0F2E52" text-anchor="middle">
+        <text x="110" y="128" data-r="1" data-p="0.12">0,9</text>
+        <text x="230" y="206" data-r="1" data-p="0.28">0,6</text>
+        <text x="350" y="284" data-r="1" data-p="0.44">0,3</text>
+        <text x="470" y="310" data-r="1" data-p="0.6">0,2</text>
+      </g>
+      <g font-size="14" font-weight="700" fill="#5A6A7C" text-anchor="middle">
+        <text x="110" y="393">tentativa 1</text><text x="230" y="393">tentativa 2</text><text x="350" y="393">tentativa 3</text><text x="470" y="393">tentativa 4</text>
+      </g>
+      <g data-r="1" data-p="0.85">
+        <line x1="40" y1="240" x2="530" y2="240" stroke="#C77800" stroke-width="3" stroke-dasharray="10 7"/>
+        <text x="536" y="232" text-anchor="end" font-size="15" font-weight="800" fill="#C77800">média 0,5</text>
+      </g>
+      <g data-r="2" data-p="0.3">
+        <text x="0" y="430" font-size="11" font-weight="800" fill="#5A6A7C" letter-spacing="1">VANTAGEM</text>
+        <g font-size="21" font-weight="800" text-anchor="middle">
+          <text x="110" y="433" fill="#1F8A5B">+0,4</text>
+          <text x="230" y="433" fill="#1F8A5B">+0,1</text>
+          <text x="350" y="433" fill="#B43B3B">−0,2</text>
+          <text x="470" y="433" fill="#B43B3B">−0,3</text>
+        </g>
+      </g>
+      <g data-r="3" data-p="0.1" font-size="16" font-weight="800" text-anchor="middle">
+        <text x="170" y="70" fill="#1F8A5B">↑ reforça</text>
+        <text x="410" y="70" fill="#B43B3B">↓ desencoraja</text>
+      </g>
+    </svg>
+    <div class="gr-right">
+      <div class="card formula" data-r="2"><div class="k">vantagem (advantage)</div>vantagem = <em>nota</em> − <em>média do grupo</em></div>
+      <div class="card inset" data-r="4">
+        <div class="bars"><i></i><i></i><i></i><i></i></div>
+        <p><b>Todas tiraram 0,7?</b><br>Vantagem = 0 → o ART descarta. Nada a aprender.</p>
+      </div>
+      <div class="code" data-r="5"><span class="file">src/art/preprocessing/tokenize.py</span><span class="ln">reward_mean = sum(t.reward for t in group) / len(group)</span><span class="ln">for trajectory in group:</span><span class="ln" data-on="5" style="--a:0">    advantage = trajectory.reward - reward_mean</span><span class="ln">    if scale_rewards:</span><span class="ln">        advantage /= reward_std + 1e-6</span><span class="ln">    if advantage == 0 and drop_zero_advantage_trajectories:</span><span class="ln">        continue</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 7 · RULER ============ -->
+  <section class="scene" data-id="ruler">
+    <div class="kicker">07 · Recompensa automática</div>
+    <h2 class="title">RULER: o juiz que compara</h2>
+    <div class="task" data-r="0">Tarefa do agente: <b>“Conte uma piada sobre computadores”</b></div>
+    <div class="card tj" style="top:170px" data-r="0" data-p="0.2"><div class="k">Tentativa A</div><p>Por que o computador não vai a festas? Porque ele sempre trava!</p></div>
+    <div class="card tj" style="top:284px" data-r="0" data-p="0.35"><div class="k">Tentativa B</div><p>Como se chama um computador que não funciona? Quebrado.</p></div>
+    <div class="card tj" style="top:398px" data-r="0" data-p="0.5"><div class="k">Tentativa C</div><p>Não sei piadas de computador, mas o céu é azul por causa do espalhamento de Rayleigh.</p></div>
+    <div class="score q" style="top:195px" data-r="0" data-p="0.6" data-x="1" data-xp="0.55">?</div>
+    <div class="score q" style="top:309px" data-r="0" data-p="0.7" data-x="1" data-xp="0.6">?</div>
+    <div class="score q" style="top:423px" data-r="0" data-p="0.8" data-x="1" data-xp="0.65">?</div>
+    <div class="score s1" style="top:195px" data-r="1" data-p="0.6" data-anim="pop">0,9</div>
+    <div class="score s2" style="top:309px" data-r="1" data-p="0.66" data-anim="pop">0,5</div>
+    <div class="score s3" style="top:423px" data-r="1" data-p="0.72" data-anim="pop">0,1</div>
+    <svg style="position:absolute;left:0;top:0" width="1280" height="720">
+      <g stroke="#A9CFE5" stroke-width="3" fill="none" stroke-linecap="round">
+        <path d="M656 220 C 690 220, 690 312, 722 312" data-r="1" data-p="0.2" data-anim="draw"/>
+        <path d="M656 334 L 722 334" data-r="1" data-p="0.25" data-anim="draw"/>
+        <path d="M656 448 C 690 448, 690 356, 722 356" data-r="1" data-p="0.3" data-anim="draw"/>
+      </g>
+    </svg>
+    <div class="judge" data-r="1" data-p="0.1" data-anim="pop">
+      <div class="disc">
+        <svg width="70" height="64" viewBox="0 0 70 64" fill="none" stroke="#F2B349" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M35 6 V56 M18 58 H52 M10 16 H60"/><path d="M10 16 L2 36 H18 Z M60 16 L52 36 H68 Z"/>
+        </svg>
+      </div>
+      <b>RULER</b><small>um LLM como juiz<br>compara o grupo</small>
+    </div>
+    <div class="ru-right">
+      <div class="card" data-r="2"><b>Comparar &gt; nota absoluta.</b> E o GRPO só usa a nota relativa dentro do grupo.</div>
+      <div class="okchip" data-r="3">✓ sem dados rotulados</div>
+      <div class="okchip" data-r="3" data-p="0.4">✓ sem reward feita à mão</div>
+      <div class="card" data-r="4" style="border-left:5px solid var(--warn)"><b>Na obra:</b> o fiscal põe as paredes lado a lado em vez de usar uma régua absoluta.</div>
+    </div>
+  </section>
+
+  <!-- ============ 8 · CÓDIGO ============ -->
+  <section class="scene" data-id="codigo">
+    <div class="kicker">08 · Na prática</div>
+    <h2 class="title">O código cabe numa tela</h2>
+    <div class="code codepanel py" data-r="0" data-p="0.3"><span class="ln">import art</span><span class="ln">from art.serverless.backend import ServerlessBackend</span><span class="ln">from art.rewards import ruler_score_group</span><span class="ln"> </span><span class="ln" data-on="1" data-off="2">model = art.TrainableModel(name="agente-001", project="meu-agente",</span><span class="ln" data-on="1" data-off="2">                           base_model="Qwen/Qwen3.8-27B")</span><span class="ln" data-on="1" data-off="2">backend = ServerlessBackend()        # ou LocalBackend(), se tiver GPU</span><span class="ln" data-on="1" data-off="2">await model.register(backend)</span><span class="ln"> </span><span class="ln" data-on="2" data-off="3">async def rollout(model, cenario) -&gt; art.Trajectory:</span><span class="ln" data-on="2" data-off="3">    traj = art.Trajectory(messages_and_choices=[...])  # system + user</span><span class="ln" data-on="2" data-off="3">    resp = await model.openai_client().chat.completions.create(</span><span class="ln" data-on="2" data-off="3">        model=model.get_inference_name(), messages=traj.messages())</span><span class="ln" data-on="2" data-off="3">    traj.messages_and_choices.append(resp.choices[0])</span><span class="ln" data-on="2" data-off="3">    return traj                        # a nota vem do RULER</span><span class="ln"> </span><span class="ln">for passo in range(await model.get_step(), 50):</span><span class="ln" data-on="3" data-off="4">    grupos = await art.gather_trajectory_groups(</span><span class="ln" data-on="3" data-off="4">        (art.TrajectoryGroup(rollout(model, c) for _ in range(8)) for c in cenarios),</span><span class="ln" data-on="3" data-off="4">        after_each=lambda g: ruler_score_group(g, "openai/o4-mini"))</span><span class="ln" data-on="4">    result = await backend.train(model, grupos, learning_rate=1e-5)</span><span class="ln" data-on="4">    await model.log(grupos, metrics=result.metrics, step=result.step, split="train")</span></div>
+    <div class="notes">
+      <div class="nt" data-r="1" data-on="1" data-off="2"><b>1 · Modelo + backend</b><small>TrainableModel e register()</small></div>
+      <div class="nt" data-r="2" data-on="2" data-off="3"><b>2 · rollout()</b><small>roda o agente num cenário e devolve uma Trajectory</small></div>
+      <div class="nt" data-r="3" data-on="3" data-off="4"><b>3 · Grupos de 8 + RULER</b><small>gather_trajectory_groups + ruler_score_group</small></div>
+      <div class="nt" data-r="4" data-on="4"><b>4 · backend.train()</b><small>um passo de GRPO; repete e acompanha a nota</small></div>
+    </div>
+  </section>
+
+  <!-- ============ 9 · RESULTADOS ============ -->
+  <section class="scene" data-id="resultados">
+    <div class="kicker">09 · Resultados e requisitos</div>
+    <h2 class="title">Funciona? Quando usar?</h2>
+    <div class="card arte" data-r="0">
+      <span class="tag">ART·E</span>
+      <h3>Agente de pesquisa em e-mails treinado com ART</h3>
+      <div class="vs" data-r="0" data-p="0.55"><div class="win">Qwen 2.5 14B + ART</div><span>superou</span><div class="lose">o3 (OpenAI)</div></div>
+      <div class="src">openpipe.ai/blog/art-e-mail-agent</div>
+    </div>
+    <div class="exs" data-r="1">
+      <div class="card-k">Exemplos oficiais</div>
+      <div class="row">
+        <span class="chip" data-r="1" data-p="0.1">2048</span><span class="chip" data-r="1" data-p="0.2">Jogo da velha</span><span class="chip" data-r="1" data-p="0.3">Codenames</span>
+        <span class="chip" data-r="1" data-p="0.5">MCP·RL</span><span class="chip" data-r="1" data-p="0.6">Temporal Clue</span><span class="chip" data-r="1" data-p="0.7">LangGraph</span>
+      </div>
+    </div>
+    <div class="card need yes" data-r="2">
+      <h4>Você precisa de</h4>
+      <ul><li><span>✓</span>Um projeto que já usa LLM</li><li><span>✓</span>~10 cenários do mundo real</li></ul>
+    </div>
+    <div class="card need no" data-r="3">
+      <h4>Você não precisa de</h4>
+      <ul><li><span>✗</span>Dataset rotulado</li><li><span>✗</span>GPU no seu computador</li><li><span>✗</span>Doutorado em RL</li></ul>
+    </div>
+  </section>
+
+  <!-- ============ 10 · RESUMO ============ -->
+  <section class="scene dark" data-id="resumo">
+    <div class="rs-kicker" data-r="0">RESUMO</div>
+    <div class="rs-title" data-r="0">Recapitulando</div>
+    <div class="rs-list">
+      <div class="it" data-r="1"><i>1</i>Várias tentativas → uma nota pra cada → GRPO reforça o que ficou acima da média</div>
+      <div class="it" data-r="2"><i>2</i>Cliente no seu código · backend com GPU treina e serve o modelo (LoRA + vLLM)</div>
+      <div class="it" data-r="2" data-p="0.6"><i>3</i>RULER dá a nota quando não existe gabarito</div>
+    </div>
+    <div class="rs-cmd" data-r="3">
+      <div class="term"><span>$</span> pip install openpipe-art</div>
+      <div class="more">Notebook 2048 no Colab<br>Docs: art.openpipe.ai</div>
+    </div>
+    <div class="rs-bye" data-r="4" data-anim="pop"><b>Bons estudos!</b><small>Aulas IA · Bônus</small></div>
+  </section>
+
+  <div id="cap"></div>
+</div>
+
+<script>
+const clamp = (x) => Math.min(1, Math.max(0, x));
+const ease = (x) => 1 - Math.pow(1 - clamp(x), 3);
+const REVEAL = 0.55;   // s
+const HL = 0.35;       // s
+
+let TL, SCENES = [];
+
+// realce de sintaxe mínimo pra Python
+function highlight(el) {
+  const re = /(#.*$)|("[^"]*")|\b(import|from|async|def|await|for|in|return|lambda|if|and)\b|\b(\d+(?:\.\d+)?(?:e-?\d+)?)\b|\b([a-z_]+)(?=\()/gm;
+  el.querySelectorAll('.ln').forEach((ln) => {
+    ln.innerHTML = ln.innerHTML.replace(re, (m, c, s, k, n, f) =>
+      c ? `<span class="tk-c">${c}</span>` : s ? `<span class="tk-s">${s}</span>` : k ? `<span class="tk-k">${k}</span>` :
+      n ? `<span class="tk-n">${n}</span>` : `<span class="tk-f">${f}</span>`);
+  });
+}
+
+function buildBricks() {
+  const g = document.getElementById('bricks');
+  const W = 58, H = 26, cols = 6, rows = 8, x0 = 128, y0 = 400;
+  let k = 0; const total = rows * cols;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const off = r % 2 ? W / 2 : 0;
+      let x = x0 + c * W + off, w = W - 4;
+      if (r % 2 && c === cols - 1) w = W / 2 - 4;
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', x); rect.setAttribute('y', y0 - (r + 1) * H); rect.setAttribute('width', w); rect.setAttribute('height', H - 4);
+      rect.setAttribute('rx', 3); rect.setAttribute('fill', (r + c) % 3 ? '#C4623A' : '#B0532F');
+      rect.dataset.f = (0.04 + 0.62 * (k / total)).toFixed(4); rect.dataset.anim = 'drop';
+      g.appendChild(rect); k++;
+    }
+    if (r % 2) { // meio tijolo no começo da fiada deslocada
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', x0); rect.setAttribute('y', y0 - (r + 1) * H); rect.setAttribute('width', W / 2 - 4); rect.setAttribute('height', H - 4);
+      rect.setAttribute('rx', 3); rect.setAttribute('fill', '#B0532F');
+      rect.dataset.f = (0.04 + 0.62 * (k / total)).toFixed(4); rect.dataset.anim = 'drop';
+      g.appendChild(rect);
+    }
+  }
+}
+
+function init(tl) {
+  TL = tl;
+  document.querySelectorAll('.py').forEach(highlight);
+  buildBricks();
+  const byId = Object.fromEntries(tl.cenas.map((c) => [c.id, c]));
+  document.querySelectorAll('section.scene').forEach((el) => {
+    const c = byId[el.dataset.id];
+    const dur = c.fim - c.inicio;
+    const at = (k, p, d) => { const f = c.frases[k]; return f.inicio + (f.fim - f.inicio) * (p || 0) + (d || 0); };
+    const items = [], hls = [];
+    el.querySelectorAll('[data-r],[data-f]').forEach((n) => {
+      const t0 = n.dataset.f !== undefined ? c.inicio + dur * +n.dataset.f : at(+n.dataset.r, +n.dataset.p, +n.dataset.d);
+      const x = n.dataset.x !== undefined ? at(+n.dataset.x, +n.dataset.xp) : null;
+      if (n.dataset.anim === 'draw') { const L = n.getTotalLength(); n.style.strokeDasharray = L; n.dataset.len = L; }
+      items.push({ n, t0, x, anim: n.dataset.anim || 'up', svg: n instanceof SVGElement });
+    });
+    el.querySelectorAll('[data-on]').forEach((n) => {
+      const on = at(+n.dataset.on);
+      const off = n.dataset.off !== undefined ? at(+n.dataset.off) : Infinity;
+      hls.push({ n, on, off });
+    });
+    SCENES.push({ el, id: c.id, c, items, hls });
+  });
+}
+
+function applyReveal(it, p) {
+  const n = it.n;
+  if (it.anim === 'draw') { n.style.strokeDashoffset = (1 - p) * n.dataset.len; return; }
+  n.style.opacity = p;
+  if (it.anim === 'grow') { n.style.transformBox = 'fill-box'; n.style.transformOrigin = 'bottom'; n.style.transform = `scaleY(${p})`; n.style.opacity = p > 0 ? 1 : 0; return; }
+  if (it.anim === 'drop') { n.style.transform = `translateY(${(1 - p) * -24}px)`; return; }
+  if (it.anim === 'pop') { const s = 0.86 + 0.14 * p; if (it.svg) { n.style.transformBox = 'fill-box'; n.style.transformOrigin = 'center'; } n.style.transform = `scale(${s})`; return; }
+  if (it.svg) { n.style.transform = `translateY(${(1 - p) * 12}px)`; return; }
+  n.style.transform = `translateY(${(1 - p) * 16}px)`;
+}
+
+// ganchos específicos de cena (tempo absoluto t)
+const HOOKS = {
+  loop(t, sc) {
+    const f = sc.c.frases;
+    const ang = (k) => -90 + 90 * (k - 1);   // nó k (1..4)
+    let a = -90;
+    for (let k = 2; k <= 4; k++) a += 90 * ease((t - f[k].inicio) / 0.9);
+    a += 90 * ease((t - (f[4].inicio + (f[4].fim - f[4].inicio) * 0.7)) / 1.0);
+    const r = 170, rad = a * Math.PI / 180;
+    const dot = document.getElementById('loopdot');
+    dot.setAttribute('cx', (300 + r * Math.cos(rad)).toFixed(2));
+    dot.setAttribute('cy', (250 + r * Math.sin(rad)).toFixed(2));
+    dot.style.opacity = ease((t - f[1].inicio) / 0.4);
+    const sw = ease((t - (f[4].inicio + (f[4].fim - f[4].inicio) * 0.8)) / 0.6);
+    document.getElementById('passo1').setAttribute('opacity', 1 - sw);
+    document.getElementById('passo2').setAttribute('opacity', sw);
+    return a.toFixed(2) + sw.toFixed(3);
+  },
+};
+
+let lastCap = null;
+function render(t) {
+  let sig = '';
+  let cur = SCENES.findIndex((s) => t >= s.c.inicio && t < s.c.fim);
+  if (cur < 0) cur = SCENES.length - 1;
+  SCENES.forEach((s, i) => {
+    let op = 0;
+    if (i === cur) {
+      const fin = i === 0 ? 1 : ease((t - s.c.inicio) / 0.5);
+      const fout = i === SCENES.length - 1 ? 1 : ease((s.c.fim - t) / 0.4);
+      op = Math.min(fin, fout);
+    }
+    s.el.style.opacity = op;
+    s.el.style.visibility = op > 0 ? 'visible' : 'hidden';
+    sig += op.toFixed(3) + '|';
+  });
+  const sc = SCENES[cur];
+  for (const it of sc.items) {
+    let p = ease((t - it.t0) / REVEAL);
+    if (it.x !== null) p *= 1 - ease((t - it.x) / 0.35);
+    applyReveal(it, p);
+    sig += p.toFixed(3);
+  }
+  for (const h of sc.hls) {
+    const a = Math.min(ease((t - h.on) / HL), 1 - ease((t - h.off) / HL));
+    h.n.style.setProperty('--a', a.toFixed(3));
+    sig += a.toFixed(3);
+  }
+  if (HOOKS[sc.id]) sig += HOOKS[sc.id](t, sc);
+
+  // legenda
+  const fr = sc.c.frases;
+  let k = -1;
+  for (let j = 0; j < fr.length; j++) if (t >= fr[j].inicio - 0.12) k = j;
+  const cap = document.getElementById('cap');
+  let cop = 0;
+  if (k >= 0) {
+    cop = Math.min(ease((t - (fr[k].inicio - 0.12)) / 0.18), 1 - ease((t - (fr[k].fim + 0.7)) / 0.2));
+    if (lastCap !== sc.id + k) { cap.textContent = fr[k].legenda; lastCap = sc.id + k; }
+  }
+  cap.style.opacity = cop;
+  cap.style.visibility = cop > 0 ? 'visible' : 'hidden';
+  sig += '#' + lastCap + cop.toFixed(3);
+
+  document.getElementById('brand').style.opacity = sc.el.classList.contains('dark') ? 0 : 1;
+  return sig;
+}
+</script>
+</body>
+</html>

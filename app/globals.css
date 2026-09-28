@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source not "../scripts";
 
 /* ============================================================
    Aulas IA · Design System (base Araújo, adaptado para web)
