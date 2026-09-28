@@ -1,0 +1,126 @@
+O **ART** (Agent Reinforcement Trainer) é um framework open source da OpenPipe, em Python, pra fazer um agente de IA **aprender com a própria experiência**. Ele pega a técnica de aprendizado por reforço chamada **GRPO** e embrulha num jeito simples de usar dentro de um projeto que já existe.
+
+## O problema que ele resolve
+
+Um agente que trabalha em várias etapas (busca e-mail, chama ferramenta, decide o próximo passo) acerta às vezes. Com prompt você melhora até um ponto, e depois trava num teto.
+
+O ajuste fino tradicional (SFT) pede um **gabarito**: pra cada entrada, a resposta certa. Pra agente, esse gabarito quase nunca existe, porque tem vários caminhos válidos até o resultado.
+
+O aprendizado por reforço (RL) inverte a lógica: **o modelo tenta, recebe uma nota e passa a repetir o que deu certo**.
+
+<AnalogiaObra titulo="O aprendiz e o fiscal">
+Você não escreve um manual com cada movimento da colher de pedreiro. Você deixa o aprendiz levantar a parede, o fiscal vistoria e dá uma nota, e com o tempo ele aprende o que funciona.
+
+O ART é o canteiro de treino desse aprendiz. Você define as tarefas (os cenários) e o jeito de dar nota, e ele cuida do resto.
+</AnalogiaObra>
+
+## Vocabulário mínimo
+
+- **Cenário** (*scenario*): uma situação de treino. Ex: "ache o e-mail sobre o contrato".
+- **Rollout**: uma tentativa do agente num cenário.
+- **Trajetória** (`art.Trajectory`): o registro da tentativa, com todas as mensagens (system, user, assistant, tool).
+- **Recompensa** (*reward*): a nota que a trajetória recebeu.
+- **Grupo** (`art.TrajectoryGroup`): várias tentativas do mesmo cenário, que vão ser comparadas entre si.
+
+## Cliente × backend
+
+O ART tem duas partes:
+
+- **Cliente**: roda junto do seu código, até num computador sem GPU. Fala a mesma língua da API da OpenAI (`model.openai_client()`), então o seu agente muda pouco.
+- **Backend**: roda numa máquina com GPU. Usa o **vLLM** pra gerar as respostas e treina um adaptador **LoRA** por cima do modelo base.
+
+Sem GPU, você usa o `ServerlessBackend` (a Weights & Biases cuida da infraestrutura). Com GPU, usa o `LocalBackend`.
+
+<AnalogiaObra titulo="LoRA é um puxadinho">
+O modelo base é a estrutura do prédio: grande, cara e fica intacta. O LoRA é um puxadinho leve construído em cima dela. Você amplia a obra sem demolir nada, e dá pra trocar o puxadinho a cada passo do treino.
+</AnalogiaObra>
+
+## O loop de treino
+
+1. **Rollouts em paralelo.** Seu código roda o agente em vários cenários, várias vezes cada. Cada conversa vira uma trajetória.
+2. **Recompensa.** Cada trajetória recebe uma nota: da sua função ou do RULER.
+3. **Treino.** As trajetórias vão agrupadas pro backend. A inferência pausa enquanto ele treina com GRPO.
+4. **Checkpoint novo.** O LoRA treinado é salvo e carregado no vLLM, e o loop recomeça com um modelo um pouco melhor.
+
+## GRPO sem medo
+
+O GRPO não precisa de nota absoluta. Ele compara as tentativas **dentro do grupo**. Quatro tentativas no mesmo cenário tiraram 0,9, 0,6, 0,3 e 0,2. A média é 0,5, e a **vantagem** de cada uma é a nota menos a média:
+
+- Tentativa 1: 0,9 − 0,5 = **+0,4** (reforça)
+- Tentativa 2: 0,6 − 0,5 = **+0,1** (reforça)
+- Tentativa 3: 0,3 − 0,5 = **−0,2** (desencoraja)
+- Tentativa 4: 0,2 − 0,5 = **−0,3** (desencoraja)
+
+No código do ART (`src/art/preprocessing/tokenize.py`) é literalmente isso:
+
+```python
+reward_mean = sum(t.reward for t in group) / len(group)
+for trajectory in group:
+    advantage = trajectory.reward - reward_mean
+    if scale_rewards:
+        advantage /= reward_std + 1e-6
+    if advantage == 0 and drop_zero_advantage_trajectories:
+        continue
+```
+
+Se todas as tentativas tiram a mesma nota, a vantagem é zero e o ART descarta essas trajetórias: não há o que aprender com elas.
+
+## RULER: quando você não sabe dar a nota
+
+Escrever uma função de recompensa boa é difícil. O **RULER** usa outro modelo de linguagem como juiz: ele lê as tentativas do grupo lado a lado e dá uma nota de 0 a 1 pra cada.
+
+Funciona por dois motivos: comparar é mais fácil do que dar nota absoluta, e o GRPO só usa a nota relativa dentro do grupo. Resultado: dá pra treinar **sem dados rotulados e sem função de recompensa feita à mão**.
+
+<Callout tipo="dica" titulo="Tamanho do grupo">
+A documentação recomenda de 4 a 8 trajetórias por grupo no RULER. Grupo muito grande confunde o juiz e custa mais caro.
+</Callout>
+
+## O código, de ponta a ponta
+
+```python
+import art
+from art.serverless.backend import ServerlessBackend
+from art.rewards import ruler_score_group
+
+model = art.TrainableModel(name="agente-001", project="meu-agente",
+                           base_model="Qwen/Qwen3.8-27B")
+backend = ServerlessBackend()        # ou LocalBackend(), se tiver GPU
+await model.register(backend)
+
+async def rollout(model, cenario) -> art.Trajectory:
+    traj = art.Trajectory(messages_and_choices=[...])  # system + user
+    resp = await model.openai_client().chat.completions.create(
+        model=model.get_inference_name(), messages=traj.messages())
+    traj.messages_and_choices.append(resp.choices[0])
+    return traj                        # a nota vem do RULER
+
+for passo in range(await model.get_step(), 50):
+    grupos = await art.gather_trajectory_groups(
+        (art.TrajectoryGroup(rollout(model, c) for _ in range(8)) for c in cenarios),
+        after_each=lambda g: ruler_score_group(g, "openai/o4-mini"))
+    result = await backend.train(model, grupos, learning_rate=1e-5)
+    await model.log(grupos, metrics=result.metrics, step=result.step, split="train")
+```
+
+## Funciona? Quando usar?
+
+A OpenPipe treinou um Qwen 2.5 de 14B pra pesquisar e-mails (o **ART·E**), e ele superou o o3 da OpenAI nessa tarefa. Os exemplos oficiais incluem 2048, jogo da velha, Codenames, MCP·RL, Temporal Clue e integração com LangGraph.
+
+- **Você precisa de:** um projeto que já usa um LLM e uns 10 cenários que representem o mundo real.
+- **Você não precisa de:** dataset rotulado, GPU no seu computador, nem doutorado em RL.
+
+<Checkpoint>
+Você entendeu que o ART treina agentes por tentativa e nota: roda várias tentativas do mesmo cenário, dá uma nota pra cada, e o GRPO reforça o que ficou acima da média do grupo. O cliente fica no seu código, o backend com GPU treina um LoRA e serve pelo vLLM, e o RULER dá as notas quando não existe gabarito.
+</Checkpoint>
+
+<FonteGratis tipo="repo" titulo="OpenPipe/ART" url="https://github.com/OpenPipe/ART" autor="OpenPipe">
+Código-fonte, exemplos (2048, jogo da velha, Codenames, MCP·RL) e notebooks prontos pro Colab.
+</FonteGratis>
+
+<FonteGratis tipo="doc" titulo="Documentação do ART" url="https://art.openpipe.ai" autor="OpenPipe">
+Quick start com o notebook do 2048, loop de treino, cliente, backend e RULER.
+</FonteGratis>
+
+<FonteGratis tipo="post" titulo="ART·E: um agente de e-mail que supera o o3" url="https://openpipe.ai/blog/art-e-mail-agent" autor="OpenPipe">
+Como treinaram um Qwen 2.5 14B com ART pra pesquisar e-mails melhor que o o3.
+</FonteGratis>

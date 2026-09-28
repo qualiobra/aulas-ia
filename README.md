@@ -28,7 +28,7 @@ npm run build
 npm start
 ```
 
-Build gera 42 páginas estáticas (8 módulos + 28 lições + home + glossário + sobre + 404).
+Build gera 43 páginas estáticas (8 módulos + 28 lições + home + glossário + sobre + bônus ART + 404).
 
 ## Estrutura
 
@@ -38,11 +38,14 @@ app/
   modulo/[slug]/page.tsx       página do módulo
   modulo/[slug]/licao/[licao]/ página da lição (carrega MDX dinâmico)
   glossario/                   16 termos de AI coding
+  extras/art/                  aula bônus em vídeo sobre o ART (OpenPipe)
   sobre/                       sobre o projeto
 components/                    AnalogiaObra, Callout, Checkpoint,
                                ExercicioPratico, FonteGratis, Glossario,
                                Header, Footer, ProgressoLicao
 content/modulos/<slug>/        MDX de cada lição
+content/extras/                MDX das aulas bônus
+public/videos/                 vídeos das aulas bônus
 lib/
   cronograma.ts                fonte da verdade (módulos + lições)
   progresso.ts                 Zustand store persistido em localStorage
